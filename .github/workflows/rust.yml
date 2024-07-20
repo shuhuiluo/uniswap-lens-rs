@@ -8,6 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
 
 jobs:
   lint:
@@ -35,7 +36,7 @@ jobs:
           version: nightly
 
       - name: Generate contract Rust bindings
-        run: forge bind -b src/bindings/ --module --overwrite
+        run: yarn bind
 
       - name: Cache Cargo registry
         uses: actions/cache@v4
@@ -44,7 +45,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             ${{ runner.os }}-cargo-registry-
 
@@ -52,9 +53,13 @@ jobs:
         run: |
           rustup override set nightly
           rustup component add clippy --toolchain nightly
+          rustup component add rustfmt --toolchain nightly
 
       - name: Check linting
         run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
 
   test:
     needs: lint
@@ -91,7 +96,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             ${{ runner.os }}-cargo-registry-
 
@@ -99,4 +104,4 @@ jobs:
         run: cargo build
 
       - name: Run tests
-        run: cargo test
+        run: cargo test -- --test-threads=1

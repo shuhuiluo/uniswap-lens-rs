@@ -8,32 +8,6 @@ env:
   CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
 jobs:
-  npm_publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@aperture_finance'
-
-      - name: Install dependencies 📦
-        run: yarn install --frozen-lockfile
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Generate Typechain types and build
-        run: yarn build
-
-      - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
   cargo_publish:
     runs-on: ubuntu-latest
     steps:
@@ -57,7 +31,7 @@ jobs:
           version: nightly
 
       - name: Generate contract Rust bindings
-        run: forge bind -b src/bindings/ --module --overwrite
+        run: yarn bind
 
       - name: Publish to crates.io
         run: cargo publish --allow-dirty

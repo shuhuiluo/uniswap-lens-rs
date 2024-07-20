@@ -34,7 +34,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "bind": "forge bind -b src/bindings/ --module --overwrite",
+    "bind": "forge bind --alloy -b src/bindings/ --module --overwrite",
     "build": "yarn typechain && tsc --build",
     "clean": "tsc --build --clean && forge clean",
     "compile": "forge build",
@@ -51,7 +51,7 @@
     "@openzeppelin/contracts": "^5.0.2",
     "ethers": "5.7.2",
     "viem": "^2.8.4",
-    "zod":"^3.22.4"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@ethersproject/abi": "5.7.0",
