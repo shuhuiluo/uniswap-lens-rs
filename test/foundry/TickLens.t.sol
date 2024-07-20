@@ -30,11 +30,11 @@ contract TickLensTest is BaseTest, PoolUtils {
     function test_GetPopulatedTicksInRange() public {
         int24 tick = currentTick();
         try
-        new EphemeralGetPopulatedTicksInRange(
-            V3PoolCallee.wrap(pool),
-            tick - 128 * tickSpacing,
-            tick + 128 * tickSpacing
-        )
+            new EphemeralGetPopulatedTicksInRange(
+                V3PoolCallee.wrap(pool),
+                tick - 128 * tickSpacing,
+                tick + 128 * tickSpacing
+            )
         {} catch (bytes memory returnData) {
             PopulatedTick[] memory populatedTicks = abi.decode(returnData, (PopulatedTick[]));
             console2.log("length", populatedTicks.length);
