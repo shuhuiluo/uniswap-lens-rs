@@ -83,7 +83,7 @@ jobs:
           version: nightly
 
       - name: Generate contract Rust bindings
-        run: forge bind -b src/bindings/ --module --overwrite
+        run: yarn bind
 
       - name: Cache Cargo registry
         uses: actions/cache@v4
