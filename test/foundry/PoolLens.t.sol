@@ -72,6 +72,7 @@ contract PoolLensTest is BaseTest, PoolUtils {
 
 contract PCSV3PoolLensTest is BaseTest, PoolUtils {
     function setUp() public override {
+        chainId = 56;
         dex = DEX.PancakeSwapV3;
         super.setUp();
     }

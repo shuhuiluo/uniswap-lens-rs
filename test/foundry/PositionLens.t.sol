@@ -91,7 +91,7 @@ contract PositionLensTest is BaseTest {
     function verifyPosition(PositionState memory pos) internal view {
         {
             assertEq(pos.owner, npm.ownerOf(pos.tokenId), "owner");
-            (, , address token0, , uint24 fee, int24 tickLower, , uint128 liquidity, , , , ) = npm.positions(
+            (, , address token0, , uint24 fee, int24 tickLower, , uint128 liquidity, , , ,) = npm.positions(
                 pos.tokenId
             );
             assertEq(token0, pos.position.token0, "token0");
@@ -168,6 +168,7 @@ contract PositionLensTest is BaseTest {
 
 contract PCSV3PositionLensTest is PositionLensTest {
     function setUp() public override {
+        chainId = 56;
         dex = DEX.PancakeSwapV3;
         super.setUp();
     }

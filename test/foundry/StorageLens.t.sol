@@ -35,6 +35,7 @@ contract StorageLensTest is BaseTest {
 
 contract PCSV3StorageLensTest is StorageLensTest {
     function setUp() public override {
+        chainId = 56;
         dex = DEX.PancakeSwapV3;
         super.setUp();
     }
