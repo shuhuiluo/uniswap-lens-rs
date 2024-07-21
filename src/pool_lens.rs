@@ -119,8 +119,14 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::iuniswapv3pool::IUniswapV3Pool::IUniswapV3PoolInstance;
-    use alloy::{primitives::address, providers::ProviderBuilder, transports::http::reqwest::Url};
+    use crate::bindings::iuniswapv3pool::IUniswapV3Pool::{IUniswapV3PoolInstance, Mint};
+    use alloy::{
+        primitives::address,
+        providers::{ProviderBuilder, ReqwestProvider},
+        rpc::types::Filter,
+        sol_types::SolEvent,
+        transports::http::reqwest::Url,
+    };
     use anyhow::Result;
     use dotenv::dotenv;
     use futures::future::join_all;
@@ -137,10 +143,12 @@ mod tests {
         .parse()
         .unwrap()
     });
+    static PROVIDER: Lazy<ReqwestProvider> =
+        Lazy::new(|| ProviderBuilder::new().on_http(RPC_URL.clone()));
 
     #[tokio::test]
     async fn test_get_populated_ticks_in_range() -> Result<()> {
-        let provider = ProviderBuilder::new().on_http(RPC_URL.clone());
+        let provider = PROVIDER.clone();
         let pool = IUniswapV3PoolInstance::new(POOL_ADDRESS, provider.clone());
         let tick_current = pool.slot0().block(*BLOCK_NUMBER).call().await?.tick;
         let ticks = get_populated_ticks_in_range(
@@ -203,7 +211,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_static_slots() {
-        let provider = ProviderBuilder::new().on_http(RPC_URL.clone());
+        let provider = PROVIDER.clone();
         let slots = get_static_slots(POOL_ADDRESS, provider.clone(), Some(*BLOCK_NUMBER))
             .await
             .unwrap();
@@ -212,7 +220,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_ticks_slots() {
-        let provider = ProviderBuilder::new().on_http(RPC_URL.clone());
+        let provider = PROVIDER.clone();
         let pool = IUniswapV3PoolInstance::new(POOL_ADDRESS, provider.clone());
         let tick_current = pool.slot0().block(*BLOCK_NUMBER).call().await.unwrap().tick;
         let slots = get_ticks_slots(
@@ -229,38 +237,47 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_tick_bitmap_slots() {
-        let provider = ProviderBuilder::new().on_http(RPC_URL.clone());
+        let provider = PROVIDER.clone();
         let slots = get_tick_bitmap_slots(POOL_ADDRESS, provider.clone(), Some(*BLOCK_NUMBER))
             .await
             .unwrap();
         verify_slots(slots, provider).await;
     }
 
-    //     #[tokio::test]
-    //     async fn test_get_positions_slots() -> Result<()> {
-    //         let client = Arc::new(MAINNET.provider());
-    //         let filter = MintFilter::new::<&Provider<Http>, Provider<Http>>(
-    //             Filter::new().from_block(17000000 - 10000).to_block(17000000),
-    //             &client,
-    //         );
-    //         let logs = filter.query().await?;
-    //         let positions = logs
-    //             .iter()
-    //             .map(
-    //                 |&MintFilter {
-    //                      owner,
-    //                      tick_lower,
-    //                      tick_upper,
-    //                      ..
-    //                  }| PositionKey {
-    //                     owner,
-    //                     tick_lower,
-    //                     tick_upper,
-    //                 },
-    //             )
-    //             .collect();
-    //         let slots = get_positions_slots(POOL_ADDRESS, positions, client.clone(),
-    // Some(*BLOCK_NUMBER)).await?;         verify_slots(slots, client).await;
-    //         Ok(())
-    //     }
+    #[tokio::test]
+    async fn test_get_positions_slots() -> Result<()> {
+        let provider = PROVIDER.clone();
+        // create a filter to get the mint events
+        let filter = Filter::new()
+            .from_block(17000000 - 10000)
+            .to_block(17000000)
+            .event_signature(<Mint as SolEvent>::SIGNATURE_HASH);
+        let logs = provider.get_logs(&filter).await?;
+        // decode the logs into position keys
+        let positions = logs
+            .iter()
+            .map(|log| <Mint as SolEvent>::decode_log_data(log.data(), true).unwrap())
+            .map(
+                |Mint {
+                     owner,
+                     tickLower,
+                     tickUpper,
+                     ..
+                 }| PositionKey {
+                    owner,
+                    tickLower,
+                    tickUpper,
+                },
+            )
+            .collect();
+        let slots = get_positions_slots(
+            POOL_ADDRESS,
+            positions,
+            provider.clone(),
+            Some(*BLOCK_NUMBER),
+        )
+        .await?;
+        verify_slots(slots, provider).await;
+        Ok(())
+    }
 }
