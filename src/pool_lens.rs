@@ -119,33 +119,15 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bindings::iuniswapv3pool::IUniswapV3Pool::{IUniswapV3PoolInstance, Mint};
-    use alloy::{
-        primitives::address,
-        providers::{ProviderBuilder, ReqwestProvider},
-        rpc::types::Filter,
-        sol_types::SolEvent,
-        transports::http::reqwest::Url,
+    use crate::{
+        bindings::iuniswapv3pool::IUniswapV3Pool::{IUniswapV3PoolInstance, Mint},
+        tests::*,
     };
+    use alloy::{primitives::address, rpc::types::Filter, sol_types::SolEvent};
     use anyhow::Result;
-    use dotenv::dotenv;
     use futures::future::join_all;
-    use once_cell::sync::Lazy;
 
     const POOL_ADDRESS: Address = address!("88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640");
-    static BLOCK_NUMBER: Lazy<BlockId> = Lazy::new(|| BlockId::from(17000000));
-    static RPC_URL: Lazy<Url> = Lazy::new(|| {
-        dotenv().ok();
-        format!(
-            "https://mainnet.infura.io/v3/{}",
-            std::env::var("INFURA_API_KEY").unwrap()
-        )
-        .parse()
-        .unwrap()
-    });
-    static PROVIDER: Lazy<ReqwestProvider> =
-        Lazy::new(|| ProviderBuilder::new().on_http(RPC_URL.clone()));
-
     #[tokio::test]
     async fn test_get_populated_ticks_in_range() -> Result<()> {
         let provider = PROVIDER.clone();
