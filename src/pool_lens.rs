@@ -18,7 +18,7 @@ use crate::{
 use alloy::{
     contract::Error,
     eips::BlockId,
-    primitives::{Address, Bytes},
+    primitives::{aliases::I24, Address, Bytes},
     providers::Provider,
     sol_types::SolCall,
     transports::{Transport, TransportError},
@@ -27,8 +27,8 @@ use anyhow::Result;
 
 pub async fn get_populated_ticks_in_range<T, P>(
     pool: Address,
-    tick_lower: i32,
-    tick_upper: i32,
+    tick_lower: I24,
+    tick_upper: I24,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<Vec<PopulatedTick>>
@@ -72,8 +72,8 @@ where
 
 pub async fn get_ticks_slots<T, P>(
     pool: Address,
-    tick_lower: i32,
-    tick_upper: i32,
+    tick_lower: I24,
+    tick_upper: I24,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<Vec<Slot>>

@@ -94,7 +94,7 @@ mod tests {
         tests::*,
     };
     use alloy::{
-        primitives::{address, b256, keccak256, uint, B256},
+        primitives::{address, aliases::U24, b256, keccak256, uint, B256},
         sol_types::SolValue,
     };
 
@@ -119,7 +119,7 @@ mod tests {
         factory: Address,
         token_a: Address,
         token_b: Address,
-        fee: u32,
+        fee: U24,
         init_code_hash: B256,
     ) -> Address {
         let (token_0, token_1) = if token_a < token_b {
@@ -127,7 +127,7 @@ mod tests {
         } else {
             (token_b, token_a)
         };
-        let pool_key = (token_0, token_1, fee as i32);
+        let pool_key = (token_0, token_1, fee);
         factory.create2(keccak256(pool_key.abi_encode()), init_code_hash)
     }
 
