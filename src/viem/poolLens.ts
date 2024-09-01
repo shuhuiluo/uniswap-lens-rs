@@ -2,22 +2,15 @@ import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from "abitype";
 import { Address, PublicClient } from "viem";
 import {
   EphemeralGetPopulatedTicksInRange__factory,
-  EphemeralPCSV3PoolPositions__factory,
-  EphemeralPCSV3PoolSlots__factory,
-  EphemeralPCSV3PoolTickBitmap__factory,
-  EphemeralPCSV3PoolTicks__factory,
   EphemeralPoolPositions__factory,
   EphemeralPoolSlots__factory,
   EphemeralPoolTickBitmap__factory,
   EphemeralPoolTicks__factory,
 } from "../../typechain";
 import { callEphemeralContract } from "./caller";
-import { z } from 'zod';
+import { z } from "zod";
 
-export const AutomatedMarketMakerEnum = z.enum([
-  'UNISWAP_V3',
-  'PANCAKESWAP_V3',
-]);
+export const AutomatedMarketMakerEnum = z.enum(["UNISWAP_V3", "PANCAKESWAP_V3"]);
 export type AutomatedMarketMakerEnum = z.infer<typeof AutomatedMarketMakerEnum>;
 
 /**
@@ -55,17 +48,11 @@ export async function getStaticSlots(
   blockNumber?: bigint,
 ) {
   return await callEphemeralContract(
-    amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3
-      ? {
-          abi: EphemeralPCSV3PoolSlots__factory.abi,
-          bytecode: EphemeralPCSV3PoolSlots__factory.bytecode,
-          args: [pool],
-        }
-      : {
-          abi: EphemeralPoolSlots__factory.abi,
-          bytecode: EphemeralPoolSlots__factory.bytecode,
-          args: [pool],
-        },
+    {
+      abi: EphemeralPoolSlots__factory.abi,
+      bytecode: EphemeralPoolSlots__factory.bytecode,
+      args: [pool],
+    },
     publicClient,
     blockNumber,
   );
@@ -80,17 +67,11 @@ export async function getTicksSlots(
   blockNumber?: bigint,
 ) {
   return await callEphemeralContract(
-    amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3
-      ? {
-          abi: EphemeralPCSV3PoolTicks__factory.abi,
-          bytecode: EphemeralPCSV3PoolTicks__factory.bytecode,
-          args: [pool, tickLower, tickUpper],
-        }
-      : {
-          abi: EphemeralPoolTicks__factory.abi,
-          bytecode: EphemeralPoolTicks__factory.bytecode,
-          args: [pool, tickLower, tickUpper],
-        },
+    {
+      abi: EphemeralPoolTicks__factory.abi,
+      bytecode: EphemeralPoolTicks__factory.bytecode,
+      args: [pool, tickLower, tickUpper],
+    },
     publicClient,
     blockNumber,
   );
@@ -103,17 +84,11 @@ export async function getTickBitmapSlots(
   blockNumber?: bigint,
 ) {
   return await callEphemeralContract(
-    amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3
-      ? {
-          abi: EphemeralPCSV3PoolTickBitmap__factory.abi,
-          bytecode: EphemeralPCSV3PoolTickBitmap__factory.bytecode,
-          args: [pool],
-        }
-      : {
-          abi: EphemeralPoolTickBitmap__factory.abi,
-          bytecode: EphemeralPoolTickBitmap__factory.bytecode,
-          args: [pool],
-        },
+    {
+      abi: EphemeralPoolTickBitmap__factory.abi,
+      bytecode: EphemeralPoolTickBitmap__factory.bytecode,
+      args: [pool],
+    },
     publicClient,
     blockNumber,
   );
@@ -132,17 +107,11 @@ export async function getPositionsSlots(
   blockNumber?: bigint,
 ) {
   return await callEphemeralContract(
-    amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3
-      ? {
-          abi: EphemeralPCSV3PoolPositions__factory.abi,
-          bytecode: EphemeralPCSV3PoolPositions__factory.bytecode,
-          args: [pool, keys],
-        }
-      : {
-          abi: EphemeralPoolPositions__factory.abi,
-          bytecode: EphemeralPoolPositions__factory.bytecode,
-          args: [pool, keys],
-        },
+    {
+      abi: EphemeralPoolPositions__factory.abi,
+      bytecode: EphemeralPoolPositions__factory.bytecode,
+      args: [pool, keys],
+    },
     publicClient,
     blockNumber,
   );

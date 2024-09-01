@@ -16,7 +16,7 @@ import {
 import {
   EphemeralGetPositions__factory,
   EphemeralPoolSlots__factory,
-  INonfungiblePositionManager__factory,
+  IUniswapV3NonfungiblePositionManager__factory,
   IUniswapV3Pool__factory,
 } from "../../typechain";
 import { mainnet } from "viem/chains";
@@ -50,7 +50,7 @@ describe("Pool lens test with UniV3 on mainnet", () => {
   });
   const npm = getContract({
     address: UNIV3_NPM,
-    abi: INonfungiblePositionManager__factory.abi,
+    abi: IUniswapV3NonfungiblePositionManager__factory.abi,
     client: publicClient,
   });
 

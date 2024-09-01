@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {INonfungiblePositionManager as INPM} from "@aperture_finance/uni-v3-lib/src/interfaces/INonfungiblePositionManager.sol";
+import {IUniswapV3NonfungiblePositionManager as INPM} from "@aperture_finance/uni-v3-lib/src/interfaces/IUniswapV3NonfungiblePositionManager.sol";
 import "@aperture_finance/uni-v3-lib/src/LiquidityAmounts.sol";
 import "@aperture_finance/uni-v3-lib/src/PoolCaller.sol";
 import "@aperture_finance/uni-v3-lib/src/TernaryLib.sol";
@@ -15,16 +15,12 @@ import "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.so
 import "forge-std/Test.sol";
 import "solady/src/utils/SafeTransferLib.sol";
 
-    enum DEX {
-        UniswapV3,
-        PancakeSwapV3
-    }
+enum DEX {
+    UniswapV3,
+    PancakeSwapV3
+}
 
-abstract contract BaseTest is
-Test,
-IUniswapV3MintCallback,
-IUniswapV3SwapCallback
-{
+abstract contract BaseTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallback {
     using SafeTransferLib for address;
     using TernaryLib for bool;
     using TickMath for int24;
@@ -97,7 +93,7 @@ IUniswapV3SwapCallback
      ***********************************************/
 
     function sqrtPriceX96() internal view returns (uint160 sqrtRatioX96) {
-        (sqrtRatioX96,) = V3PoolCallee.wrap(pool).sqrtPriceX96AndTick();
+        (sqrtRatioX96, ) = V3PoolCallee.wrap(pool).sqrtPriceX96AndTick();
     }
 
     function currentTick() internal view returns (int24 tick) {
@@ -191,7 +187,7 @@ IUniswapV3SwapCallback
             // Swap back to the initial price
             V3PoolCallee.wrap(pool).swap(address(this), false, int256(amountIn), initialPrice, new bytes(0));
         } else {
-            (int256 amount0,) = V3PoolCallee.wrap(pool).swap(
+            (int256 amount0, ) = V3PoolCallee.wrap(pool).swap(
                 address(this),
                 false,
                 int256(amountIn),

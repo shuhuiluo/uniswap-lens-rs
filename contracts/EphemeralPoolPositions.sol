@@ -30,7 +30,7 @@ contract EphemeralPoolPositions is PoolUtils {
         unchecked {
             uint256 POSITIONS_SLOT = getPositionsSlot();
             uint256 length = keys.length;
-        // each position occupies 4 storage slots
+            // each position occupies 4 storage slots
             slots = new Slot[](length << 2);
             uint256 j;
             for (uint256 i; i < length; ++i) {

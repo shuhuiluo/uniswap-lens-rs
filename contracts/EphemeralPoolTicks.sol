@@ -38,9 +38,9 @@ contract EphemeralPoolTicks is PoolUtils {
         (int16 wordPosLower, int16 wordPosUpper) = getWordPositions(tickLower, tickUpper, tickSpacing);
         unchecked {
             (uint256[] memory tickBitmap, uint256 count) = getTickBitmapAndCount(pool, wordPosLower, wordPosUpper);
-        // each tick occupies 4 storage slots
+            // each tick occupies 4 storage slots
             slots = new Slot[](count << 2);
-        // fetch populated tick data
+            // fetch populated tick data
             uint256 idx;
             for (int16 wordPos = wordPosLower; wordPos <= wordPosUpper; ++wordPos) {
                 idx = populateTicksInWord(

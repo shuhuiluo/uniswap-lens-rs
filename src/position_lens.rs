@@ -128,7 +128,7 @@ mod tests {
     use crate::{
         bindings::{
             ephemeralgetposition::EphemeralGetPosition::{PositionFull, Slot0},
-            inonfungiblepositionmanager::INonfungiblePositionManager::INonfungiblePositionManagerInstance,
+            iuniswapv3nonfungiblepositionmanager::IUniswapV3NonfungiblePositionManager,
             iuniswapv3pool::IUniswapV3Pool::IUniswapV3PoolInstance,
         },
         tests::*,
@@ -280,7 +280,7 @@ mod tests {
             Some(*BLOCK_NUMBER),
         )
         .await?;
-        let _npm = INonfungiblePositionManagerInstance::new(NPM_ADDRESS, provider);
+        let _npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider);
         Ok(())
         // verify_position_details(positions, npm).await
     }
@@ -288,7 +288,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_all_positions_by_owner() -> Result<()> {
         let provider = PROVIDER.clone();
-        let npm = INonfungiblePositionManagerInstance::new(NPM_ADDRESS, provider.clone());
+        let npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider.clone());
         let total_supply: U256 = npm.totalSupply().block(*BLOCK_NUMBER).call().await?._0;
         let owner = npm
             .ownerOf(total_supply - uint!(1_U256))
