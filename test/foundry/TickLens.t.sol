@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@pancakeswap/v3-core/contracts/interfaces/IPancakeV3Factory.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "contracts/EphemeralGetPopulatedTicksInRange.sol";
 import "./Base.t.sol";
@@ -40,13 +39,5 @@ contract TickLensTest is BaseTest, PoolUtils {
             console2.log("length", populatedTicks.length);
             verifyTicks(populatedTicks);
         }
-    }
-}
-
-contract PCSV3TickLensTest is TickLensTest {
-    function setUp() public override {
-        chainId = 56;
-        dex = DEX.PancakeSwapV3;
-        super.setUp();
     }
 }

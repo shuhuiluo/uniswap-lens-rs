@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IPCSV3NonfungiblePositionManager} from "@aperture_finance/uni-v3-lib/src/interfaces/INonfungiblePositionManager.sol";
 import {PoolAddress} from "@aperture_finance/uni-v3-lib/src/PoolAddress.sol";
-import {PoolAddressPancakeSwapV3} from "@aperture_finance/uni-v3-lib/src/PoolAddressPancakeSwapV3.sol";
-import {IPancakeV3Pool} from "@pancakeswap/v3-core/contracts/interfaces/IPancakeV3Pool.sol";
 import "contracts/EphemeralAllPositionsByOwner.sol";
 import "contracts/EphemeralGetPosition.sol";
 import "contracts/EphemeralGetPositions.sol";
@@ -111,9 +108,9 @@ contract PositionLensTest is BaseTest {
                 uint16 observationIndex,
                 uint16 observationCardinality,
                 uint16 observationCardinalityNext,
-                uint32 feeProtocol,
+                uint8 feeProtocol,
                 bool unlocked
-            ) = IPancakeV3Pool(pool).slot0();
+            ) = IUniswapV3Pool(pool).slot0();
             assertEq(sqrtPriceX96, pos.slot0.sqrtPriceX96, "sqrtPriceX96");
             assertEq(tick, pos.slot0.tick, "tick");
             assertEq(observationIndex, pos.slot0.observationIndex, "observationIndex");
@@ -163,20 +160,5 @@ contract PositionLensTest is BaseTest {
                 verifyPosition(positions[i]);
             }
         }
-    }
-}
-
-contract PCSV3PositionLensTest is PositionLensTest {
-    function setUp() public override {
-        chainId = 56;
-        dex = DEX.PancakeSwapV3;
-        super.setUp();
-    }
-
-    // Trivially override so that the "forge-config" settings are applied.
-    /// forge-config: default.fuzz.runs = 16
-    /// forge-config: ci.fuzz.runs = 16
-    function testFuzz_GetPosition(uint256 tokenId) public override {
-        super.testFuzz_GetPosition(tokenId);
     }
 }
