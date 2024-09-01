@@ -8,8 +8,6 @@ import "@aperture_finance/uni-v3-lib/src/TernaryLib.sol";
 import "@aperture_finance/uni-v3-lib/src/TickBitmap.sol";
 import "@aperture_finance/uni-v3-lib/src/TickMath.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@pancakeswap/v3-core/contracts/interfaces/callback/IPancakeV3MintCallback.sol";
-import "@pancakeswap/v3-core/contracts/interfaces/callback/IPancakeV3SwapCallback.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3MintCallback.sol";
@@ -17,17 +15,15 @@ import "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.so
 import "forge-std/Test.sol";
 import "solady/src/utils/SafeTransferLib.sol";
 
-enum DEX {
-    UniswapV3,
-    PancakeSwapV3
-}
+    enum DEX {
+        UniswapV3,
+        PancakeSwapV3
+    }
 
 abstract contract BaseTest is
-    Test,
-    IPancakeV3MintCallback,
-    IPancakeV3SwapCallback,
-    IUniswapV3MintCallback,
-    IUniswapV3SwapCallback
+Test,
+IUniswapV3MintCallback,
+IUniswapV3SwapCallback
 {
     using SafeTransferLib for address;
     using TernaryLib for bool;
@@ -101,7 +97,7 @@ abstract contract BaseTest is
      ***********************************************/
 
     function sqrtPriceX96() internal view returns (uint160 sqrtRatioX96) {
-        (sqrtRatioX96, ) = V3PoolCallee.wrap(pool).sqrtPriceX96AndTick();
+        (sqrtRatioX96,) = V3PoolCallee.wrap(pool).sqrtPriceX96AndTick();
     }
 
     function currentTick() internal view returns (int24 tick) {
@@ -195,7 +191,7 @@ abstract contract BaseTest is
             // Swap back to the initial price
             V3PoolCallee.wrap(pool).swap(address(this), false, int256(amountIn), initialPrice, new bytes(0));
         } else {
-            (int256 amount0, ) = V3PoolCallee.wrap(pool).swap(
+            (int256 amount0,) = V3PoolCallee.wrap(pool).swap(
                 address(this),
                 false,
                 int256(amountIn),

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {INonfungiblePositionManager as INPM, IPCSV3NonfungiblePositionManager as IPCSV3NPM} from "@aperture_finance/uni-v3-lib/src/interfaces/INonfungiblePositionManager.sol";
+import {INonfungiblePositionManager as INPM} from "@aperture_finance/uni-v3-lib/src/interfaces/INonfungiblePositionManager.sol";
 import {NPMCaller, PositionFull} from "@aperture_finance/uni-v3-lib/src/NPMCaller.sol";
 import {PoolAddress} from "@aperture_finance/uni-v3-lib/src/PoolAddress.sol";
 import {PoolAddressPancakeSwapV3} from "@aperture_finance/uni-v3-lib/src/PoolAddressPancakeSwapV3.sol";
@@ -10,35 +10,35 @@ import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV
 import {ERC20Callee} from "./libraries/ERC20Caller.sol";
 import {PoolUtils} from "./PoolUtils.sol";
 
-struct Slot0 {
-    uint160 sqrtPriceX96;
-    int24 tick;
-    uint16 observationIndex;
-    uint16 observationCardinality;
-    uint16 observationCardinalityNext;
-    // `feeProtocol` is of type uint8 in Uniswap V3, and uint32 in PancakeSwap V3.
-    // We use uint32 here as this can hold both uint8 and uint32.
-    uint32 feeProtocol;
-    bool unlocked;
-}
+    struct Slot0 {
+        uint160 sqrtPriceX96;
+        int24 tick;
+        uint16 observationIndex;
+        uint16 observationCardinality;
+        uint16 observationCardinalityNext;
+        // `feeProtocol` is of type uint8 in Uniswap V3, and uint32 in PancakeSwap V3.
+        // We use uint32 here as this can hold both uint8 and uint32.
+        uint32 feeProtocol;
+        bool unlocked;
+    }
 
 // The length of the struct is 25 words.
-struct PositionState {
-    // token ID of the position
-    uint256 tokenId;
-    // position's owner
-    address owner;
-    // nonfungible position manager's position struct with real-time tokensOwed
-    PositionFull position;
-    // pool's slot0 struct
-    Slot0 slot0;
-    // pool's active liquidity
-    uint128 activeLiquidity;
-    // token0's decimals
-    uint8 decimals0;
-    // token1's decimals
-    uint8 decimals1;
-}
+    struct PositionState {
+        // token ID of the position
+        uint256 tokenId;
+        // position's owner
+        address owner;
+        // nonfungible position manager's position struct with real-time tokensOwed
+        PositionFull position;
+        // pool's slot0 struct
+        Slot0 slot0;
+        // pool's active liquidity
+        uint128 activeLiquidity;
+        // token0's decimals
+        uint8 decimals0;
+        // token1's decimals
+        uint8 decimals1;
+    }
 
 /// @title Position utility contract
 /// @author Aperture Finance
@@ -86,11 +86,11 @@ abstract contract PositionUtils is PoolUtils {
     function positionInPlace(INPM npm, uint256 tokenId, PositionFull memory pos) internal view returns (bool exists) {
         bytes4 selector = INPM.positions.selector;
         assembly ("memory-safe") {
-            // Write the abi-encoded calldata into memory.
+        // Write the abi-encoded calldata into memory.
             mstore(0, selector)
             mstore(4, tokenId)
-            // We use 36 because of the length of our calldata.
-            // We copy up to 384 bytes of return data at pos's pointer.
+        // We use 36 because of the length of our calldata.
+        // We copy up to 384 bytes of return data at pos's pointer.
             exists := staticcall(gas(), npm, 0, 0x24, pos, 0x180)
         }
     }
@@ -101,10 +101,10 @@ abstract contract PositionUtils is PoolUtils {
     function slot0InPlace(V3PoolCallee pool, Slot0 memory slot0) internal view {
         bytes4 selector = IUniswapV3PoolState.slot0.selector;
         assembly ("memory-safe") {
-            // Write the function selector into memory.
+        // Write the function selector into memory.
             mstore(0, selector)
-            // We use 4 because of the length of our calldata.
-            // We copy up to 224 bytes of return data at slot0's pointer.
+        // We use 4 because of the length of our calldata.
+        // We copy up to 224 bytes of return data at slot0's pointer.
             if iszero(staticcall(gas(), pool, 0, 4, slot0, 0xe0)) {
                 revert(0, 0)
             }

@@ -47,12 +47,3 @@ contract EphemeralPoolTickBitmap is PoolUtils {
         }
     }
 }
-
-contract EphemeralPCSV3PoolTickBitmap is EphemeralPoolTickBitmap {
-    constructor(V3PoolCallee pool) payable EphemeralPoolTickBitmap(pool) {}
-
-    function getTickBitmapSlot() internal pure override returns (uint256) {
-        // Storage slot of the `tickBitmap` mapping in PancakeSwapV3Pool.
-        return 7;
-    }
-}

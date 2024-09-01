@@ -30,7 +30,7 @@ contract EphemeralPoolPositions is PoolUtils {
         unchecked {
             uint256 POSITIONS_SLOT = getPositionsSlot();
             uint256 length = keys.length;
-            // each position occupies 4 storage slots
+        // each position occupies 4 storage slots
             slots = new Slot[](length << 2);
             uint256 j;
             for (uint256 i; i < length; ++i) {
@@ -54,14 +54,5 @@ contract EphemeralPoolPositions is PoolUtils {
                 slots[j++] = Slot(slot, data);
             }
         }
-    }
-}
-
-contract EphemeralPCSV3PoolPositions is EphemeralPoolPositions {
-    constructor(V3PoolCallee pool, PositionKey[] memory keys) payable EphemeralPoolPositions(pool, keys) {}
-
-    function getPositionsSlot() internal pure override returns (uint256) {
-        // Storage slot of the `positions` mapping in PancakeSwapV3Pool.
-        return 8;
     }
 }

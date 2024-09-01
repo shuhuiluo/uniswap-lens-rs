@@ -38,9 +38,9 @@ contract EphemeralPoolTicks is PoolUtils {
         (int16 wordPosLower, int16 wordPosUpper) = getWordPositions(tickLower, tickUpper, tickSpacing);
         unchecked {
             (uint256[] memory tickBitmap, uint256 count) = getTickBitmapAndCount(pool, wordPosLower, wordPosUpper);
-            // each tick occupies 4 storage slots
+        // each tick occupies 4 storage slots
             slots = new Slot[](count << 2);
-            // fetch populated tick data
+        // fetch populated tick data
             uint256 idx;
             for (int16 wordPos = wordPosLower; wordPos <= wordPosUpper; ++wordPos) {
                 idx = populateTicksInWord(
@@ -111,18 +111,5 @@ contract EphemeralPoolTicks is PoolUtils {
             }
             return idx;
         }
-    }
-}
-
-contract EphemeralPCSV3PoolTicks is EphemeralPoolTicks {
-    constructor(
-        V3PoolCallee pool,
-        int24 tickLower,
-        int24 tickUpper
-    ) payable EphemeralPoolTicks(pool, tickLower, tickUpper) {}
-
-    function getTicksSlot() internal pure override returns (uint256) {
-        // Storage slot of the `ticks` mapping in PancakeSwapV3Pool.
-        return 6;
     }
 }
