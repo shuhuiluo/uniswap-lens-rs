@@ -200,10 +200,11 @@ mod tests {
         let provider = PROVIDER.clone();
         let pool = IUniswapV3PoolInstance::new(POOL_ADDRESS, provider.clone());
         let tick_current = pool.slot0().block(*BLOCK_NUMBER).call().await?.tick;
+        let tick_spacing = pool.tickSpacing().block(*BLOCK_NUMBER).call().await?._0;
         let ticks = get_populated_ticks_in_range(
             POOL_ADDRESS,
             tick_current,
-            tick_current,
+            tick_current + (tick_spacing << 8),
             provider,
             Some(*BLOCK_NUMBER),
         )
