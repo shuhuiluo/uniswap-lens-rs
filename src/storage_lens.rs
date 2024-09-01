@@ -6,6 +6,7 @@
 use crate::bindings::ephemeralstoragelens::{
     EphemeralStorageLens, EphemeralStorageLens::EphemeralStorageLensInstance,
 };
+use alloc::vec::Vec;
 use alloy::{
     eips::BlockId,
     primitives::{Address, FixedBytes},

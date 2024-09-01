@@ -1,6 +1,7 @@
 //! # uniswap-lens
 //!
 //! A library for querying Uniswap V3 using ephemeral lens contracts.
+#![cfg_attr(not(any(feature = "std", test)), no_std)]
 #![warn(
     missing_copy_implementations,
     missing_debug_implementations,
@@ -11,6 +12,8 @@
 )]
 #![cfg_attr(not(test), warn(unused_crate_dependencies))]
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+
+extern crate alloc;
 
 #[allow(
     missing_copy_implementations,

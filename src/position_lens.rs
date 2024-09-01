@@ -25,6 +25,7 @@ use crate::{
     },
     call_ephemeral_contract,
 };
+use alloc::vec::Vec;
 use alloy::{
     contract::Error,
     eips::BlockId,
