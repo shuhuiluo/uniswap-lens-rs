@@ -7,4 +7,10 @@
 [![npm version](https://img.shields.io/npm/v/aperture-lens/latest.svg)](https://www.npmjs.com/package/aperture-lens/v/latest)
 [![crates.io](https://img.shields.io/crates/v/uniswap-lens.svg)](https://crates.io/crates/uniswap-lens)
 
-Contains ephemeral lens contracts that can be called without deployment and their interfaces in various Web3 libraries.
+A library for querying Uniswap V3 using ephemeral lens contracts.
+
+## Features
+
+- Lens contracts in Solidity using the revert-in-constructor pattern
+- Rust SDK for querying lens contracts using [alloy-rs](https://github.com/alloy-rs)
+- TypeScript SDK for querying lens contracts using viem

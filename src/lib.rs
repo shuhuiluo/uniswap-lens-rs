@@ -1,4 +1,6 @@
 //! # uniswap-lens
+//!
+//! A library for querying Uniswap V3 using ephemeral lens contracts.
 #![warn(
     missing_copy_implementations,
     missing_debug_implementations,

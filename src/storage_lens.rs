@@ -1,3 +1,8 @@
+//! ## Storage Lens
+//!
+//! The storage lens module provides a function to batch `eth_getStorageAt` RPC calls in a single
+//! `eth_call` by overriding the target contract's deployed bytecode with `EphemeralStorageLens`.
+
 use crate::bindings::ephemeralstoragelens::{
     EphemeralStorageLens, EphemeralStorageLens::EphemeralStorageLensInstance,
 };

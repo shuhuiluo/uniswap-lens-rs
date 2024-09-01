@@ -3,11 +3,11 @@ name = "uniswap-lens"
 version = "0.2.0"
 edition = "2021"
 authors = ["Shuhui Luo <twitter.com/aureliano_law>"]
-description = "Contains ephemeral lens contracts that can be called without deployment and their Rust interfaces."
+description = "A library for querying Uniswap V3 using ephemeral lens contracts."
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/shuhuiluo/uniswap-lens-rs"
-keywords = ["alloy", "ethereum", "solidity", "rust", "uniswap"]
+keywords = ["alloy", "ethereum", "solidity", "uniswap"]
 include = ["src/**/*.rs"]
 
 [dependencies]
