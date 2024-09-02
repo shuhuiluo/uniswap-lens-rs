@@ -14,3 +14,8 @@ A library for querying Uniswap V3 using ephemeral lens contracts.
 - Lens contracts in Solidity using the revert-in-constructor pattern
 - Rust SDK for querying lens contracts using [alloy-rs](https://github.com/alloy-rs)
 - TypeScript SDK for querying lens contracts using viem
+
+## Note on `no_std`
+
+By default, this library does not depend on the standard library (`std`). However, the `std` feature can be enabled via
+the `std` feature flag.
