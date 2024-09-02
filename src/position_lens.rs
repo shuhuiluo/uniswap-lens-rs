@@ -192,14 +192,14 @@ mod tests {
             NPM_ADDRESS,
             uint!(4_U256),
             provider.clone(),
-            Some(*BLOCK_NUMBER),
+            Some(BLOCK_NUMBER),
         )
         .await?;
         let pool = IUniswapV3PoolInstance::new(
             compute_pool_address(FACTORY_ADDRESS, token0, token1, fee, POOL_INIT_CODE_HASH),
             provider,
         );
-        let slot0 = pool.slot0().block(*BLOCK_NUMBER).call().await?;
+        let slot0 = pool.slot0().block(BLOCK_NUMBER).call().await?;
         assert_eq!(tokenId, uint!(4_U256));
         assert_eq!(sqrtPriceX96, slot0.sqrtPriceX96);
         assert_eq!(tick, slot0.tick);
@@ -234,7 +234,7 @@ mod tests {
     //         u128,
     //         u128,
     //     )> = multicall
-    //         .block(match *BLOCK_NUMBER {
+    //         .block(match BLOCK_NUMBER {
     //             BlockId::Number(n) => n,
     //             _ => panic!("block id must be a number"),
     //         })
@@ -278,7 +278,7 @@ mod tests {
                 .map(|i| U256::from_limbs([i, 0, 0, 0]))
                 .collect(),
             provider.clone(),
-            Some(*BLOCK_NUMBER),
+            Some(BLOCK_NUMBER),
         )
         .await?;
         let _npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider);
@@ -290,15 +290,15 @@ mod tests {
     async fn test_get_all_positions_by_owner() -> Result<()> {
         let provider = PROVIDER.clone();
         let npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider.clone());
-        let total_supply: U256 = npm.totalSupply().block(*BLOCK_NUMBER).call().await?._0;
+        let total_supply: U256 = npm.totalSupply().block(BLOCK_NUMBER).call().await?._0;
         let owner = npm
             .ownerOf(total_supply - uint!(1_U256))
-            .block(*BLOCK_NUMBER)
+            .block(BLOCK_NUMBER)
             .call()
             .await?
             .owner;
         let _positions =
-            get_all_positions_by_owner(NPM_ADDRESS, owner, provider, Some(*BLOCK_NUMBER)).await?;
+            get_all_positions_by_owner(NPM_ADDRESS, owner, provider, Some(BLOCK_NUMBER)).await?;
         Ok(())
         // verify_position_details(positions, npm).await
     }

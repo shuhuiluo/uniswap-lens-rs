@@ -200,14 +200,14 @@ mod tests {
     async fn test_get_populated_ticks_in_range() -> Result<()> {
         let provider = PROVIDER.clone();
         let pool = IUniswapV3PoolInstance::new(POOL_ADDRESS, provider.clone());
-        let tick_current = pool.slot0().block(*BLOCK_NUMBER).call().await?.tick;
-        let tick_spacing = pool.tickSpacing().block(*BLOCK_NUMBER).call().await?._0;
+        let tick_current = pool.slot0().block(BLOCK_NUMBER).call().await?.tick;
+        let tick_spacing = pool.tickSpacing().block(BLOCK_NUMBER).call().await?._0;
         let ticks = get_populated_ticks_in_range(
             POOL_ADDRESS,
             tick_current,
             tick_current + (tick_spacing << 8),
             provider,
-            Some(*BLOCK_NUMBER),
+            Some(BLOCK_NUMBER),
         )
         .await?;
         assert!(!ticks.is_empty());
@@ -220,7 +220,7 @@ mod tests {
         // );
         // #[allow(clippy::type_complexity)]
         // let alt_ticks: Vec<(u128, i128, U256, U256, i64, U256, u32, bool)> = multicall
-        //     .block(match *BLOCK_NUMBER {
+        //     .block(match BLOCK_NUMBER {
         //         BlockId::Number(n) => n,
         //         _ => panic!("block id must be a number"),
         //     })
@@ -252,7 +252,7 @@ mod tests {
         let futures = slots[0..4].iter().map(|slot| async move {
             let data = provider
                 .get_storage_at(POOL_ADDRESS, slot.slot)
-                .block_id(*BLOCK_NUMBER)
+                .block_id(BLOCK_NUMBER)
                 .await
                 .unwrap();
             assert!(slot.data.eq(&data));
@@ -263,7 +263,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_static_slots() {
         let provider = PROVIDER.clone();
-        let slots = get_static_slots(POOL_ADDRESS, provider.clone(), Some(*BLOCK_NUMBER))
+        let slots = get_static_slots(POOL_ADDRESS, provider.clone(), Some(BLOCK_NUMBER))
             .await
             .unwrap();
         verify_slots(slots, provider).await;
@@ -273,13 +273,13 @@ mod tests {
     async fn test_get_ticks_slots() {
         let provider = PROVIDER.clone();
         let pool = IUniswapV3PoolInstance::new(POOL_ADDRESS, provider.clone());
-        let tick_current = pool.slot0().block(*BLOCK_NUMBER).call().await.unwrap().tick;
+        let tick_current = pool.slot0().block(BLOCK_NUMBER).call().await.unwrap().tick;
         let slots = get_ticks_slots(
             POOL_ADDRESS,
             tick_current,
             tick_current,
             provider.clone(),
-            Some(*BLOCK_NUMBER),
+            Some(BLOCK_NUMBER),
         )
         .await
         .unwrap();
@@ -289,7 +289,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_tick_bitmap_slots() {
         let provider = PROVIDER.clone();
-        let slots = get_tick_bitmap_slots(POOL_ADDRESS, provider.clone(), Some(*BLOCK_NUMBER))
+        let slots = get_tick_bitmap_slots(POOL_ADDRESS, provider.clone(), Some(BLOCK_NUMBER))
             .await
             .unwrap();
         verify_slots(slots, provider).await;
@@ -300,12 +300,12 @@ mod tests {
         let provider = PROVIDER.clone();
         // create a filter to get the mint events
         let filter = Filter::new()
-            .from_block(17000000 - 10000)
-            .to_block(17000000)
+            .from_block(BLOCK_NUMBER.as_u64().unwrap() - 10000)
+            .to_block(BLOCK_NUMBER.as_u64().unwrap())
             .event_signature(<Mint as SolEvent>::SIGNATURE_HASH);
         let logs = provider.get_logs(&filter).await?;
         // decode the logs into position keys
-        let positions = logs
+        let positions: Vec<_> = logs
             .iter()
             .map(|log| <Mint as SolEvent>::decode_log_data(log.data(), true).unwrap())
             .map(
@@ -321,11 +321,12 @@ mod tests {
                 },
             )
             .collect();
+        assert!(!positions.is_empty());
         let slots = get_positions_slots(
             POOL_ADDRESS,
             positions,
             provider.clone(),
-            Some(*BLOCK_NUMBER),
+            Some(BLOCK_NUMBER),
         )
         .await?;
         verify_slots(slots, provider).await;
