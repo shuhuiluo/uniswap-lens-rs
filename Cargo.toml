@@ -11,7 +11,7 @@ keywords = ["alloy", "ethereum", "solidity", "uniswap"]
 include = ["src/**/*.rs"]
 
 [dependencies]
-alloy = { version = "0.3.0", features = ["contract", "rpc-types", "transports"] }
+alloy = { version = "0.3.0", features = ["contract", "rpc-types"] }
 anyhow = "1"
 
 [features]
