@@ -9,7 +9,7 @@ import { SolidityUserConfig } from "hardhat/types/config";
  */
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.22",
+    version: "0.8.26",
     settings: {
       optimizer: {
         enabled: true,
@@ -18,6 +18,7 @@ const config: HardhatUserConfig = {
       viaIR: true,
       evmVersion: "paris",
       metadata: {
+        appendCBOR: false,
         bytecodeHash: "none",
       },
     },

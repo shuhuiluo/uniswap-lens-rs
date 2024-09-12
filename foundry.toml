@@ -8,6 +8,7 @@ cache = true
 optimizer = true
 optimizer_runs = 4294967295
 bytecode_hash = 'none'
+cbor_metadata = false
 sparse_mode = true
 ignored_error_codes = [3860, 5574]
 
