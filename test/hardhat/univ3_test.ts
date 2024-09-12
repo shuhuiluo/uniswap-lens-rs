@@ -76,7 +76,7 @@ describe("Pool lens test with UniV3 on mainnet", () => {
 
   it("Test getting populated ticks", async () => {
     const [, tickCurrent] = await poolContract.read.slot0({ blockNumber });
-    const ticks = await getPopulatedTicksInRange(pool, tickCurrent, tickCurrent, publicClient, blockNumber);
+    const [ticks] = await getPopulatedTicksInRange(pool, tickCurrent, tickCurrent, publicClient, blockNumber);
     await Promise.all(
       ticks.map(async ({ tick, liquidityGross, liquidityNet }) => {
         const [_liquidityGross, _liquidityNet] = await poolContract.read.ticks([tick], { blockNumber });

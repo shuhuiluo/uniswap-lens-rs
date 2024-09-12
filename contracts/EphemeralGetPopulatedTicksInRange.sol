@@ -9,8 +9,12 @@ import "./PoolUtils.sol";
 /// revert data, and decoded by `abi.decode(data, (PopulatedTick[]))`
 contract EphemeralGetPopulatedTicksInRange is PoolUtils {
     constructor(V3PoolCallee pool, int24 tickLower, int24 tickUpper) payable {
-        PopulatedTick[] memory populatedTicks = getPopulatedTicksInRange(pool, tickLower, tickUpper);
-        bytes memory returnData = abi.encode(populatedTicks);
+        (PopulatedTick[] memory populatedTicks, int24 tickSpacing) = getPopulatedTicksInRange(
+            pool,
+            tickLower,
+            tickUpper
+        );
+        bytes memory returnData = abi.encode(populatedTicks, tickSpacing);
         assembly ("memory-safe") {
             revert(add(returnData, 0x20), mload(returnData))
         }
@@ -25,10 +29,10 @@ contract EphemeralGetPopulatedTicksInRange is PoolUtils {
         V3PoolCallee pool,
         int24 tickLower,
         int24 tickUpper
-    ) public payable returns (PopulatedTick[] memory populatedTicks) {
+    ) public payable returns (PopulatedTick[] memory populatedTicks, int24 tickSpacing) {
         require(tickLower <= tickUpper);
         // checks that the pool exists
-        int24 tickSpacing = IUniswapV3Pool(V3PoolCallee.unwrap(pool)).tickSpacing();
+        tickSpacing = IUniswapV3Pool(V3PoolCallee.unwrap(pool)).tickSpacing();
         (int16 wordPosLower, int16 wordPosUpper) = getWordPositions(tickLower, tickUpper, tickSpacing);
         unchecked {
             (uint256[] memory tickBitmap, uint256 count) = getTickBitmapAndCount(pool, wordPosLower, wordPosUpper);

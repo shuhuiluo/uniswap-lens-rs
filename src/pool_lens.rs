@@ -4,15 +4,19 @@
 
 use crate::{
     bindings::{
-        ephemeralgetpopulatedticksinrange::EphemeralGetPopulatedTicksInRange::{
-            getPopulatedTicksInRangeCall, getPopulatedTicksInRangeReturn,
-            EphemeralGetPopulatedTicksInRangeInstance, PopulatedTick,
+        ephemeralgetpopulatedticksinrange::{
+            EphemeralGetPopulatedTicksInRange::{
+                getPopulatedTicksInRangeCall, getPopulatedTicksInRangeReturn,
+                EphemeralGetPopulatedTicksInRangeInstance,
+            },
+            PoolUtils::PopulatedTick,
         },
-        ephemeralpoolpositions::EphemeralPoolPositions::{
-            EphemeralPoolPositionsInstance, PositionKey,
+        ephemeralpoolpositions::{
+            EphemeralPoolPositions::EphemeralPoolPositionsInstance, PoolUtils::PositionKey,
         },
-        ephemeralpoolslots::EphemeralPoolSlots::{
-            getSlotsCall, getSlotsReturn, EphemeralPoolSlotsInstance, Slot,
+        ephemeralpoolslots::{
+            EphemeralPoolSlots::{getSlotsCall, getSlotsReturn, EphemeralPoolSlotsInstance},
+            PoolUtils::Slot,
         },
         ephemeralpooltickbitmap::EphemeralPoolTickBitmap::EphemeralPoolTickBitmapInstance,
         ephemeralpoolticks::EphemeralPoolTicks::EphemeralPoolTicksInstance,
@@ -49,7 +53,7 @@ pub async fn get_populated_ticks_in_range<T, P>(
     tick_upper: I24,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<Vec<PopulatedTick>>
+) -> Result<(Vec<PopulatedTick>, I24)>
 where
     T: Transport + Clone,
     P: Provider<T>,
@@ -58,10 +62,16 @@ where
         provider, pool, tick_lower, tick_upper,
     );
     match call_ephemeral_contract!(deploy_builder, getPopulatedTicksInRangeCall, block_id) {
-        Ok(getPopulatedTicksInRangeReturn { populatedTicks }) => Ok(populatedTicks
-            .into_iter()
-            .filter(|PopulatedTick { tick, .. }| *tick >= tick_lower && *tick <= tick_upper)
-            .collect()),
+        Ok(getPopulatedTicksInRangeReturn {
+            populatedTicks,
+            tickSpacing,
+        }) => Ok((
+            populatedTicks
+                .into_iter()
+                .filter(|PopulatedTick { tick, .. }| *tick >= tick_lower && *tick <= tick_upper)
+                .collect(),
+            tickSpacing,
+        )),
         Err(err) => Err(err.into()),
     }
 }
@@ -202,7 +212,7 @@ mod tests {
         let pool = IUniswapV3PoolInstance::new(POOL_ADDRESS, provider.clone());
         let tick_current = pool.slot0().block(BLOCK_NUMBER).call().await?.tick;
         let tick_spacing = pool.tickSpacing().block(BLOCK_NUMBER).call().await?._0;
-        let ticks = get_populated_ticks_in_range(
+        let (ticks, _) = get_populated_ticks_in_range(
             POOL_ADDRESS,
             tick_current,
             tick_current + (tick_spacing << 8),

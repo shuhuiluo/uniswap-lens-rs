@@ -9,7 +9,7 @@ macro_rules! call_ephemeral_contract {
         match deploy_builder.call_raw().await {
             Err(Error::TransportError(err)) => match err {
                 TransportError::ErrorResp(payload) => {
-                    let data: Bytes = payload.try_data_as().unwrap().unwrap();
+                    let data: Bytes = payload.as_revert_data().unwrap();
                     Ok(<$call_type>::abi_decode_returns(data.as_ref(), true).unwrap())
                 }
                 _ => panic!("should be an error response: {:?}", err),

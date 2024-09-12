@@ -35,7 +35,11 @@ contract TickLensTest is BaseTest, PoolUtils {
                 tick + 128 * tickSpacing
             )
         {} catch (bytes memory returnData) {
-            PopulatedTick[] memory populatedTicks = abi.decode(returnData, (PopulatedTick[]));
+            (PopulatedTick[] memory populatedTicks, int24 _tickSpacing) = abi.decode(
+                returnData,
+                (PopulatedTick[], int24)
+            );
+            assertEq(_tickSpacing, IUniswapV3Pool(pool).tickSpacing(), "tickSpacing");
             console2.log("length", populatedTicks.length);
             verifyTicks(populatedTicks);
         }
