@@ -7,14 +7,16 @@ macro_rules! call_ephemeral_contract {
             None => $deploy_builder,
         };
         match deploy_builder.call_raw().await {
-            Err(Error::TransportError(err)) => match err {
-                TransportError::ErrorResp(payload) => {
-                    let data: Bytes = payload.as_revert_data().unwrap();
-                    Ok(<$call_type>::abi_decode_returns(data.as_ref(), true).unwrap())
+            Err(ContractError::TransportError(TransportError::ErrorResp(payload))) => {
+                match payload.as_revert_data() {
+                    Some(data) => Ok(<$call_type as SolCall>::abi_decode_returns(
+                        data.as_ref(),
+                        true,
+                    )?),
+                    None => Err(Error::InvalidRevertData),
                 }
-                _ => panic!("should be an error response: {:?}", err),
-            },
-            Err(err) => Err(err),
+            }
+            Err(err) => Err(Error::ContractError(err)),
             Ok(_) => panic!("deployment should revert"),
         }
     }};

@@ -5,29 +5,29 @@
 use crate::{
     bindings::{
         ephemeralgetpopulatedticksinrange::{
+            EphemeralGetPopulatedTicksInRange,
             EphemeralGetPopulatedTicksInRange::{
                 getPopulatedTicksInRangeCall, getPopulatedTicksInRangeReturn,
-                EphemeralGetPopulatedTicksInRangeInstance,
             },
             PoolUtils::PopulatedTick,
         },
-        ephemeralpoolpositions::{
-            EphemeralPoolPositions::EphemeralPoolPositionsInstance, PoolUtils::PositionKey,
-        },
+        ephemeralpoolpositions::{EphemeralPoolPositions, PoolUtils::PositionKey},
         ephemeralpoolslots::{
-            EphemeralPoolSlots::{getSlotsCall, getSlotsReturn, EphemeralPoolSlotsInstance},
+            EphemeralPoolSlots,
+            EphemeralPoolSlots::{getSlotsCall, getSlotsReturn},
             PoolUtils::Slot,
         },
-        ephemeralpooltickbitmap::EphemeralPoolTickBitmap::EphemeralPoolTickBitmapInstance,
-        ephemeralpoolticks::EphemeralPoolTicks::EphemeralPoolTicksInstance,
+        ephemeralpooltickbitmap::EphemeralPoolTickBitmap,
+        ephemeralpoolticks::EphemeralPoolTicks,
     },
     call_ephemeral_contract,
+    error::Error,
 };
 use alloc::vec::Vec;
 use alloy::{
-    contract::Error,
+    contract::Error as ContractError,
     eips::BlockId,
-    primitives::{aliases::I24, Address, Bytes},
+    primitives::{aliases::I24, Address},
     providers::Provider,
     sol_types::SolCall,
     transports::{Transport, TransportError},
@@ -54,14 +54,13 @@ pub async fn get_populated_ticks_in_range<T, P>(
     tick_upper: I24,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<(Vec<PopulatedTick>, I24)>
+) -> Result<(Vec<PopulatedTick>, I24), Error>
 where
     T: Transport + Clone,
     P: Provider<T>,
 {
-    let deploy_builder = EphemeralGetPopulatedTicksInRangeInstance::deploy_builder(
-        provider, pool, tick_lower, tick_upper,
-    );
+    let deploy_builder =
+        EphemeralGetPopulatedTicksInRange::deploy_builder(provider, pool, tick_lower, tick_upper);
     match call_ephemeral_contract!(deploy_builder, getPopulatedTicksInRangeCall, block_id) {
         Ok(getPopulatedTicksInRangeReturn {
             populatedTicks,
@@ -73,7 +72,7 @@ where
                 .collect(),
             tickSpacing,
         )),
-        Err(err) => Err(err.into()),
+        Err(err) => Err(err),
     }
 }
 
@@ -103,15 +102,12 @@ pub async fn get_static_slots<T, P>(
     pool: Address,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<Vec<Slot>>
+) -> Result<Vec<Slot>, Error>
 where
     T: Transport + Clone,
     P: Provider<T>,
 {
-    get_pool_storage!(
-        EphemeralPoolSlotsInstance::deploy_builder(provider, pool),
-        block_id
-    )
+    get_pool_storage!(EphemeralPoolSlots::deploy_builder(provider, pool), block_id)
 }
 
 /// Get the storage slots in the `ticks` mapping between `tick_lower` and `tick_upper`.
@@ -134,13 +130,13 @@ pub async fn get_ticks_slots<T, P>(
     tick_upper: I24,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<Vec<Slot>>
+) -> Result<Vec<Slot>, Error>
 where
     T: Transport + Clone,
     P: Provider<T>,
 {
     get_pool_storage!(
-        EphemeralPoolTicksInstance::deploy_builder(provider, pool, tick_lower, tick_upper),
+        EphemeralPoolTicks::deploy_builder(provider, pool, tick_lower, tick_upper),
         block_id
     )
 }
@@ -160,13 +156,13 @@ pub async fn get_tick_bitmap_slots<T, P>(
     pool: Address,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<Vec<Slot>>
+) -> Result<Vec<Slot>, Error>
 where
     T: Transport + Clone,
     P: Provider<T>,
 {
     get_pool_storage!(
-        EphemeralPoolTickBitmapInstance::deploy_builder(provider, pool),
+        EphemeralPoolTickBitmap::deploy_builder(provider, pool),
         block_id
     )
 }
@@ -188,13 +184,13 @@ pub async fn get_positions_slots<T, P>(
     positions: Vec<PositionKey>,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<Vec<Slot>>
+) -> Result<Vec<Slot>, Error>
 where
     T: Transport + Clone,
     P: Provider<T>,
 {
     get_pool_storage!(
-        EphemeralPoolPositionsInstance::deploy_builder(provider, pool, positions),
+        EphemeralPoolPositions::deploy_builder(provider, pool, positions),
         block_id
     )
 }
@@ -203,20 +199,26 @@ where
 mod tests {
     use super::*;
     use crate::{
-        bindings::iuniswapv3pool::IUniswapV3Pool::{IUniswapV3PoolInstance, Mint},
+        bindings::iuniswapv3pool::{IUniswapV3Pool, IUniswapV3Pool::Mint},
         tests::*,
     };
     use alloy::{primitives::address, rpc::types::Filter, sol_types::SolEvent};
-    use anyhow::Result;
     use futures::future::join_all;
 
     const POOL_ADDRESS: Address = address!("88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640");
+
     #[tokio::test]
-    async fn test_get_populated_ticks_in_range() -> Result<()> {
+    async fn test_get_populated_ticks_in_range() {
         let provider = PROVIDER.clone();
-        let pool = IUniswapV3PoolInstance::new(POOL_ADDRESS, provider.clone());
-        let tick_current = pool.slot0().block(BLOCK_NUMBER).call().await?.tick;
-        let tick_spacing = pool.tickSpacing().block(BLOCK_NUMBER).call().await?._0;
+        let pool = IUniswapV3Pool::new(POOL_ADDRESS, provider.clone());
+        let tick_current = pool.slot0().block(BLOCK_NUMBER).call().await.unwrap().tick;
+        let tick_spacing = pool
+            .tickSpacing()
+            .block(BLOCK_NUMBER)
+            .call()
+            .await
+            .unwrap()
+            ._0;
         let (ticks, _) = get_populated_ticks_in_range(
             POOL_ADDRESS,
             tick_current,
@@ -224,7 +226,8 @@ mod tests {
             provider,
             Some(BLOCK_NUMBER),
         )
-        .await?;
+        .await
+        .unwrap();
         assert!(!ticks.is_empty());
         // let mut multicall = Multicall::new(client.clone(), None).await?;
         // multicall.add_calls(
@@ -254,7 +257,6 @@ mod tests {
         //     assert_eq!(liquidity_gross, _liquidity_gross);
         //     assert_eq!(liquidity_net, _liquidity_net);
         // }
-        Ok(())
     }
 
     async fn verify_slots<T, P>(slots: Vec<Slot>, provider: P)
@@ -287,7 +289,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_ticks_slots() {
         let provider = PROVIDER.clone();
-        let pool = IUniswapV3PoolInstance::new(POOL_ADDRESS, provider.clone());
+        let pool = IUniswapV3Pool::new(POOL_ADDRESS, provider.clone());
         let tick_current = pool.slot0().block(BLOCK_NUMBER).call().await.unwrap().tick;
         let slots = get_ticks_slots(
             POOL_ADDRESS,
@@ -311,14 +313,14 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_positions_slots() -> Result<()> {
+    async fn test_get_positions_slots() {
         let provider = PROVIDER.clone();
         // create a filter to get the mint events
         let filter = Filter::new()
             .from_block(BLOCK_NUMBER.as_u64().unwrap() - 10000)
             .to_block(BLOCK_NUMBER.as_u64().unwrap())
             .event_signature(<Mint as SolEvent>::SIGNATURE_HASH);
-        let logs = provider.get_logs(&filter).await?;
+        let logs = provider.get_logs(&filter).await.unwrap();
         // decode the logs into position keys
         let positions: Vec<_> = logs
             .iter()
@@ -343,8 +345,8 @@ mod tests {
             provider.clone(),
             Some(BLOCK_NUMBER),
         )
-        .await?;
+        .await
+        .unwrap();
         verify_slots(slots, provider).await;
-        Ok(())
     }
 }

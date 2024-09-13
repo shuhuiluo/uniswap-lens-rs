@@ -13,10 +13,11 @@ include = ["src/**/*.rs"]
 [dependencies]
 alloy = { version = "0.3", features = ["contract", "rpc-types"] }
 anyhow = "1"
+thiserror = { version = "1.0", optional = true }
 
 [features]
 default = []
-std = ["alloy/std"]
+std = ["alloy/std", "thiserror"]
 
 [dev-dependencies]
 alloy = { version = "0.3", features = ["transport-http"] }

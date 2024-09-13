@@ -6,30 +6,25 @@ use crate::{
     bindings::{
         ephemeralallpositionsbyowner::{
             EphemeralAllPositionsByOwner,
-            EphemeralAllPositionsByOwner::{
-                allPositionsCall, allPositionsReturn, EphemeralAllPositionsByOwnerInstance,
-            },
+            EphemeralAllPositionsByOwner::{allPositionsCall, allPositionsReturn},
         },
         ephemeralgetposition::{
             EphemeralGetPosition,
-            EphemeralGetPosition::{
-                getPositionCall, getPositionReturn, EphemeralGetPositionInstance,
-            },
+            EphemeralGetPosition::{getPositionCall, getPositionReturn},
         },
         ephemeralgetpositions::{
             EphemeralGetPositions,
-            EphemeralGetPositions::{
-                getPositionsCall, getPositionsReturn, EphemeralGetPositionsInstance,
-            },
+            EphemeralGetPositions::{getPositionsCall, getPositionsReturn},
         },
     },
     call_ephemeral_contract,
+    error::Error,
 };
 use alloc::vec::Vec;
 use alloy::{
-    contract::Error,
+    contract::Error as ContractError,
     eips::BlockId,
-    primitives::{Address, Bytes, U256},
+    primitives::{Address, U256},
     providers::Provider,
     sol_types::SolCall,
     transports::{Transport, TransportError},
@@ -54,15 +49,15 @@ pub async fn get_position_details<T, P>(
     token_id: U256,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<EphemeralGetPosition::PositionState>
+) -> Result<EphemeralGetPosition::PositionState, Error>
 where
     T: Transport + Clone,
     P: Provider<T>,
 {
-    let deploy_builder = EphemeralGetPositionInstance::deploy_builder(provider, npm, token_id);
+    let deploy_builder = EphemeralGetPosition::deploy_builder(provider, npm, token_id);
     match call_ephemeral_contract!(deploy_builder, getPositionCall, block_id) {
         Ok(getPositionReturn { state }) => Ok(state),
-        Err(err) => Err(err.into()),
+        Err(err) => Err(err),
     }
 }
 
@@ -84,15 +79,15 @@ pub async fn get_positions<T, P>(
     token_ids: Vec<U256>,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<Vec<EphemeralGetPositions::PositionState>>
+) -> Result<Vec<EphemeralGetPositions::PositionState>, Error>
 where
     T: Transport + Clone,
     P: Provider<T>,
 {
-    let deploy_builder = EphemeralGetPositionsInstance::deploy_builder(provider, npm, token_ids);
+    let deploy_builder = EphemeralGetPositions::deploy_builder(provider, npm, token_ids);
     match call_ephemeral_contract!(deploy_builder, getPositionsCall, block_id) {
         Ok(getPositionsReturn { positions }) => Ok(positions),
-        Err(err) => Err(err.into()),
+        Err(err) => Err(err),
     }
 }
 
@@ -114,15 +109,15 @@ pub async fn get_all_positions_by_owner<T, P>(
     owner: Address,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<Vec<EphemeralAllPositionsByOwner::PositionState>>
+) -> Result<Vec<EphemeralAllPositionsByOwner::PositionState>, Error>
 where
     T: Transport + Clone,
     P: Provider<T>,
 {
-    let deploy_builder = EphemeralAllPositionsByOwnerInstance::deploy_builder(provider, npm, owner);
+    let deploy_builder = EphemeralAllPositionsByOwner::deploy_builder(provider, npm, owner);
     match call_ephemeral_contract!(deploy_builder, allPositionsCall, block_id) {
         Ok(allPositionsReturn { positions }) => Ok(positions),
-        Err(err) => Err(err.into()),
+        Err(err) => Err(err),
     }
 }
 
@@ -133,7 +128,7 @@ mod tests {
         bindings::{
             ephemeralgetposition::EphemeralGetPosition::{PositionFull, Slot0},
             iuniswapv3nonfungiblepositionmanager::IUniswapV3NonfungiblePositionManager,
-            iuniswapv3pool::IUniswapV3Pool::IUniswapV3PoolInstance,
+            iuniswapv3pool::IUniswapV3Pool,
         },
         tests::*,
     };
@@ -176,7 +171,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_position_details() -> Result<()> {
+    async fn test_get_position_details() {
         let provider = PROVIDER.clone();
         let EphemeralGetPosition::PositionState {
             tokenId,
@@ -197,16 +192,16 @@ mod tests {
             provider.clone(),
             Some(BLOCK_NUMBER),
         )
-        .await?;
-        let pool = IUniswapV3PoolInstance::new(
+        .await
+        .unwrap();
+        let pool = IUniswapV3Pool::new(
             compute_pool_address(FACTORY_ADDRESS, token0, token1, fee, POOL_INIT_CODE_HASH),
             provider,
         );
-        let slot0 = pool.slot0().block(BLOCK_NUMBER).call().await?;
+        let slot0 = pool.slot0().block(BLOCK_NUMBER).call().await.unwrap();
         assert_eq!(tokenId, uint!(4_U256));
         assert_eq!(sqrtPriceX96, slot0.sqrtPriceX96);
         assert_eq!(tick, slot0.tick);
-        Ok(())
     }
 
     // async fn verify_position_details(
@@ -273,7 +268,7 @@ mod tests {
     // }
 
     #[tokio::test]
-    async fn test_get_positions() -> Result<()> {
+    async fn test_get_positions() {
         let provider = PROVIDER.clone();
         let _positions = get_positions(
             NPM_ADDRESS,
@@ -283,26 +278,34 @@ mod tests {
             provider.clone(),
             Some(BLOCK_NUMBER),
         )
-        .await?;
+        .await
+        .unwrap();
         let _npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider);
-        Ok(())
         // verify_position_details(positions, npm).await
     }
 
     #[tokio::test]
-    async fn test_get_all_positions_by_owner() -> Result<()> {
+    async fn test_get_all_positions_by_owner() {
         let provider = PROVIDER.clone();
         let npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider.clone());
-        let total_supply: U256 = npm.totalSupply().block(BLOCK_NUMBER).call().await?._0;
+        let total_supply: U256 = npm
+            .totalSupply()
+            .block(BLOCK_NUMBER)
+            .call()
+            .await
+            .unwrap()
+            ._0;
         let owner = npm
             .ownerOf(total_supply - uint!(1_U256))
             .block(BLOCK_NUMBER)
             .call()
-            .await?
+            .await
+            .unwrap()
             .owner;
         let _positions =
-            get_all_positions_by_owner(NPM_ADDRESS, owner, provider, Some(BLOCK_NUMBER)).await?;
-        Ok(())
+            get_all_positions_by_owner(NPM_ADDRESS, owner, provider, Some(BLOCK_NUMBER))
+                .await
+                .unwrap();
         // verify_position_details(positions, npm).await
     }
 }

@@ -20,6 +20,7 @@ extern crate alloc;
 #[allow(warnings)]
 pub mod bindings;
 pub mod caller;
+pub mod error;
 pub mod pool_lens;
 pub mod position_lens;
 pub mod storage_lens;
@@ -28,5 +29,5 @@ pub mod storage_lens;
 mod tests;
 
 pub mod prelude {
-    pub use super::{bindings::*, pool_lens::*, position_lens::*, storage_lens::*};
+    pub use super::{error::Error, pool_lens::*, position_lens::*, storage_lens::*};
 }
