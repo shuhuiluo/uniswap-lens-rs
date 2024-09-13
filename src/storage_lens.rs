@@ -9,7 +9,7 @@ use crate::bindings::ephemeralstoragelens::{
 use alloc::vec::Vec;
 use alloy::{
     eips::BlockId,
-    primitives::{Address, FixedBytes},
+    primitives::{Address, B256},
     providers::Provider,
     rpc::types::state::{AccountOverride, StateOverride},
     transports::Transport,
@@ -26,13 +26,16 @@ use anyhow::Result;
 /// * `provider`: The alloy provider
 /// * `block_id`: Optional block id to query
 ///
-/// returns: Result<Vec<[u8; 32], Global>, ContractError<M>>
+/// ## Returns
+///
+/// The storage values at the given slots
+#[inline]
 pub async fn get_storage_at<T, P>(
     address: Address,
-    slots: Vec<FixedBytes<32>>,
+    slots: Vec<B256>,
     provider: P,
     block_id: Option<BlockId>,
-) -> Result<Vec<FixedBytes<32>>>
+) -> Result<Vec<B256>>
 where
     T: Transport + Clone,
     P: Provider<T>,
@@ -71,7 +74,7 @@ mod tests {
         let slots = get_storage_at(
             POOL_ADDRESS,
             (0..10)
-                .map(|i| FixedBytes::from(U256::from_limbs([i, 0, 0, 0])))
+                .map(|i| B256::from(U256::from_limbs([i, 0, 0, 0])))
                 .collect(),
             provider.clone(),
             Some(BLOCK_NUMBER),

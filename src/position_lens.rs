@@ -48,6 +48,7 @@ use anyhow::Result;
 /// ## Returns
 ///
 /// The position details
+#[inline]
 pub async fn get_position_details<T, P>(
     npm: Address,
     token_id: U256,
@@ -77,6 +78,7 @@ where
 /// ## Returns
 ///
 /// The array of position details
+#[inline]
 pub async fn get_positions<T, P>(
     npm: Address,
     token_ids: Vec<U256>,
@@ -106,6 +108,7 @@ where
 /// ## Returns
 ///
 /// The array of position details
+#[inline]
 pub async fn get_all_positions_by_owner<T, P>(
     npm: Address,
     owner: Address,
@@ -274,7 +277,7 @@ mod tests {
         let provider = PROVIDER.clone();
         let _positions = get_positions(
             NPM_ADDRESS,
-            (1u64..100)
+            (1_u64..100)
                 .map(|i| U256::from_limbs([i, 0, 0, 0]))
                 .collect(),
             provider.clone(),

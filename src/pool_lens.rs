@@ -47,6 +47,7 @@ use anyhow::Result;
 /// ## Returns
 ///
 /// A vector of populated ticks within the range
+#[inline]
 pub async fn get_populated_ticks_in_range<T, P>(
     pool: Address,
     tick_lower: I24,
@@ -97,6 +98,7 @@ macro_rules! get_pool_storage {
 /// ## Returns
 ///
 /// A vector of slots containing the storage data
+#[inline]
 pub async fn get_static_slots<T, P>(
     pool: Address,
     provider: P,
@@ -125,6 +127,7 @@ where
 /// ## Returns
 ///
 /// A vector of slots containing the storage data
+#[inline]
 pub async fn get_ticks_slots<T, P>(
     pool: Address,
     tick_lower: I24,
@@ -152,6 +155,7 @@ where
 /// ## Returns
 ///
 /// A vector of slots containing the storage data
+#[inline]
 pub async fn get_tick_bitmap_slots<T, P>(
     pool: Address,
     provider: P,
@@ -178,6 +182,7 @@ where
 /// ## Returns
 ///
 /// A vector of slots containing the storage data
+#[inline]
 pub async fn get_positions_slots<T, P>(
     pool: Address,
     positions: Vec<PositionKey>,
