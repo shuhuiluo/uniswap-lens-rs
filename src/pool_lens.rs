@@ -140,6 +140,7 @@ where
         block_id
     )
 }
+
 /// Get the storage slots in the `tickBitmap` mapping.
 ///
 /// ## Arguments
@@ -166,6 +167,7 @@ where
         block_id
     )
 }
+
 /// Get the storage slots in the `positions` mapping.
 ///
 /// ## Arguments

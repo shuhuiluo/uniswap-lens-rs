@@ -38,7 +38,7 @@ where
     P: Provider<T>,
 {
     // override the deployed bytecode at `address`
-    let state = StateOverride::from([(
+    let state = StateOverride::from_iter([(
         address,
         AccountOverride {
             code: Some(EphemeralStorageLens::DEPLOYED_BYTECODE.clone()),
