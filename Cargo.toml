@@ -1,6 +1,6 @@
 [package]
 name = "uniswap-lens"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2021"
 authors = ["Shuhui Luo <twitter.com/aureliano_law>"]
 description = "A library for querying Uniswap V3 using ephemeral lens contracts."
@@ -13,11 +13,11 @@ include = ["src/**/*.rs"]
 [dependencies]
 alloy = { version = "0.5", features = ["contract", "rpc-types"] }
 anyhow = "1"
-thiserror = { version = "1.0", optional = true }
+thiserror = { version = "2", default-features = false }
 
 [features]
 default = []
-std = ["alloy/std", "thiserror"]
+std = ["alloy/std", "thiserror/std"]
 
 [dev-dependencies]
 alloy = { version = "0.5", features = ["transport-http"] }
