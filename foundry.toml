@@ -5,8 +5,10 @@ libs = ['lib']
 test = 'test/foundry'
 cache = true
 
+evm_version = 'paris'
 optimizer = true
 optimizer_runs = 4294967295
+via-ir = true
 bytecode_hash = 'none'
 cbor_metadata = false
 sparse_mode = true

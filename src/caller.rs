@@ -13,7 +13,7 @@ macro_rules! call_ephemeral_contract {
                         data.as_ref(),
                         true,
                     )?),
-                    None => Err(Error::InvalidRevertData),
+                    None => Err(Error::InvalidRevertData(payload)),
                 }
             }
             Err(err) => Err(Error::ContractError(err)),
