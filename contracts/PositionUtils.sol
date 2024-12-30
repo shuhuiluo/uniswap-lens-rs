@@ -3,8 +3,6 @@ pragma solidity ^0.8.0;
 
 import {IUniswapV3NonfungiblePositionManager as INPM} from "@aperture_finance/uni-v3-lib/src/interfaces/IUniswapV3NonfungiblePositionManager.sol";
 import {NPMCaller, PositionFull} from "@aperture_finance/uni-v3-lib/src/NPMCaller.sol";
-import {PoolAddress} from "@aperture_finance/uni-v3-lib/src/PoolAddress.sol";
-import {PoolAddressPancakeSwapV3} from "@aperture_finance/uni-v3-lib/src/PoolAddressPancakeSwapV3.sol";
 import {IUniswapV3PoolState, V3PoolCallee} from "@aperture_finance/uni-v3-lib/src/PoolCaller.sol";
 import {IUniswapV3Factory} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import {ERC20Callee} from "./libraries/ERC20Caller.sol";

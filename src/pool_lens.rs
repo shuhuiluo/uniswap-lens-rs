@@ -32,7 +32,6 @@ use alloy::{
     sol_types::SolCall,
     transports::{Transport, TransportError},
 };
-use anyhow::Result;
 
 /// Get the populated ticks in a tick range.
 ///

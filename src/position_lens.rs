@@ -29,7 +29,6 @@ use alloy::{
     sol_types::SolCall,
     transports::{Transport, TransportError},
 };
-use anyhow::Result;
 
 /// Get the details of a position given the token ID.
 ///
