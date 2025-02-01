@@ -27,10 +27,11 @@ use alloc::vec::Vec;
 use alloy::{
     contract::Error as ContractError,
     eips::BlockId,
+    network::Network,
     primitives::{aliases::I24, Address},
     providers::Provider,
     sol_types::SolCall,
-    transports::{Transport, TransportError},
+    transports::TransportError,
 };
 
 /// Get the populated ticks in a tick range.
@@ -47,7 +48,7 @@ use alloy::{
 ///
 /// A vector of populated ticks within the range
 #[inline]
-pub async fn get_populated_ticks_in_range<T, P>(
+pub async fn get_populated_ticks_in_range<N, P>(
     pool: Address,
     tick_lower: I24,
     tick_upper: I24,
@@ -55,8 +56,8 @@ pub async fn get_populated_ticks_in_range<T, P>(
     block_id: Option<BlockId>,
 ) -> Result<(Vec<PopulatedTick>, I24), Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     let deploy_builder =
         EphemeralGetPopulatedTicksInRange::deploy_builder(provider, pool, tick_lower, tick_upper);
@@ -97,14 +98,14 @@ macro_rules! get_pool_storage {
 ///
 /// A vector of slots containing the storage data
 #[inline]
-pub async fn get_static_slots<T, P>(
+pub async fn get_static_slots<N, P>(
     pool: Address,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<Vec<Slot>, Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     get_pool_storage!(EphemeralPoolSlots::deploy_builder(provider, pool), block_id)
 }
@@ -123,7 +124,7 @@ where
 ///
 /// A vector of slots containing the storage data
 #[inline]
-pub async fn get_ticks_slots<T, P>(
+pub async fn get_ticks_slots<N, P>(
     pool: Address,
     tick_lower: I24,
     tick_upper: I24,
@@ -131,8 +132,8 @@ pub async fn get_ticks_slots<T, P>(
     block_id: Option<BlockId>,
 ) -> Result<Vec<Slot>, Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     get_pool_storage!(
         EphemeralPoolTicks::deploy_builder(provider, pool, tick_lower, tick_upper),
@@ -152,14 +153,14 @@ where
 ///
 /// A vector of slots containing the storage data
 #[inline]
-pub async fn get_tick_bitmap_slots<T, P>(
+pub async fn get_tick_bitmap_slots<N, P>(
     pool: Address,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<Vec<Slot>, Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     get_pool_storage!(
         EphemeralPoolTickBitmap::deploy_builder(provider, pool),
@@ -180,15 +181,15 @@ where
 ///
 /// A vector of slots containing the storage data
 #[inline]
-pub async fn get_positions_slots<T, P>(
+pub async fn get_positions_slots<N, P>(
     pool: Address,
     positions: Vec<PositionKey>,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<Vec<Slot>, Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     get_pool_storage!(
         EphemeralPoolPositions::deploy_builder(provider, pool, positions),
@@ -260,10 +261,10 @@ mod tests {
         // }
     }
 
-    async fn verify_slots<T, P>(slots: Vec<Slot>, provider: P)
+    async fn verify_slots<N, P>(slots: Vec<Slot>, provider: P)
     where
-        T: Transport + Clone,
-        P: Provider<T>,
+        N: Network,
+        P: Provider<N>,
     {
         assert!(!slots.is_empty());
         let provider = provider.root();

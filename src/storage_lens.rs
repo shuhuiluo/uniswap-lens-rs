@@ -7,10 +7,10 @@ use crate::{bindings::ephemeralstoragelens::EphemeralStorageLens, error::Error};
 use alloc::vec::Vec;
 use alloy::{
     eips::BlockId,
+    network::Network,
     primitives::{Address, B256},
     providers::Provider,
     rpc::types::state::{AccountOverride, StateOverride},
-    transports::Transport,
 };
 
 /// Batch `eth_getStorageAt` RPC calls in a single `eth_call` by overriding the target contract's
@@ -27,15 +27,15 @@ use alloy::{
 ///
 /// The storage values at the given slots
 #[inline]
-pub async fn get_storage_at<T, P>(
+pub async fn get_storage_at<N, P>(
     address: Address,
     slots: Vec<B256>,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<Vec<B256>, Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     // override the deployed bytecode at `address`
     let state = StateOverride::from_iter([(

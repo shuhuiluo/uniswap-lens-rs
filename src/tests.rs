@@ -1,6 +1,6 @@
 use alloy::{
     eips::{BlockId, BlockNumberOrTag},
-    providers::{ProviderBuilder, ReqwestProvider},
+    providers::{ProviderBuilder, RootProvider},
     transports::http::reqwest::Url,
 };
 use dotenv::dotenv;
@@ -11,5 +11,8 @@ pub(crate) static RPC_URL: Lazy<Url> = Lazy::new(|| {
     dotenv().ok();
     std::env::var("MAINNET_RPC_URL").unwrap().parse().unwrap()
 });
-pub(crate) static PROVIDER: Lazy<ReqwestProvider> =
-    Lazy::new(|| ProviderBuilder::new().on_http(RPC_URL.clone()));
+pub(crate) static PROVIDER: Lazy<RootProvider> = Lazy::new(|| {
+    ProviderBuilder::new()
+        .disable_recommended_fillers()
+        .on_http(RPC_URL.clone())
+});

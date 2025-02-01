@@ -24,10 +24,11 @@ use alloc::vec::Vec;
 use alloy::{
     contract::Error as ContractError,
     eips::BlockId,
+    network::Network,
     primitives::{Address, U256},
     providers::Provider,
     sol_types::SolCall,
-    transports::{Transport, TransportError},
+    transports::TransportError,
 };
 
 /// Get the details of a position given the token ID.
@@ -43,15 +44,15 @@ use alloy::{
 ///
 /// The position details
 #[inline]
-pub async fn get_position_details<T, P>(
+pub async fn get_position_details<N, P>(
     npm: Address,
     token_id: U256,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<EphemeralGetPosition::PositionState, Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     let deploy_builder = EphemeralGetPosition::deploy_builder(provider, npm, token_id);
     match call_ephemeral_contract!(deploy_builder, getPositionCall, block_id) {
@@ -73,15 +74,15 @@ where
 ///
 /// The array of position details
 #[inline]
-pub async fn get_positions<T, P>(
+pub async fn get_positions<N, P>(
     npm: Address,
     token_ids: Vec<U256>,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<Vec<EphemeralGetPositions::PositionState>, Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     let deploy_builder = EphemeralGetPositions::deploy_builder(provider, npm, token_ids);
     match call_ephemeral_contract!(deploy_builder, getPositionsCall, block_id) {
@@ -103,15 +104,15 @@ where
 ///
 /// The array of position details
 #[inline]
-pub async fn get_all_positions_by_owner<T, P>(
+pub async fn get_all_positions_by_owner<N, P>(
     npm: Address,
     owner: Address,
     provider: P,
     block_id: Option<BlockId>,
 ) -> Result<Vec<EphemeralAllPositionsByOwner::PositionState>, Error>
 where
-    T: Transport + Clone,
-    P: Provider<T>,
+    N: Network,
+    P: Provider<N>,
 {
     let deploy_builder = EphemeralAllPositionsByOwner::deploy_builder(provider, npm, owner);
     match call_ephemeral_contract!(deploy_builder, allPositionsCall, block_id) {
