@@ -1,4 +1,4 @@
-import { TickMath, computePoolAddress } from "@uniswap/v3-sdk";
+import { computePoolAddress } from "@uniswap/v3-sdk";
 import { expect } from "chai";
 import { Address, ContractFunctionReturnType, createPublicClient, getContract, http, toHex } from "viem";
 import {
@@ -158,7 +158,7 @@ describe("Pool lens test with UniV3 on mainnet", () => {
   });
 
   it("Test getting populated ticks slots", async () => {
-    const slots = await getTicksSlots(AMM, pool, TickMath.MIN_TICK, TickMath.MAX_TICK, publicClient, blockNumber);
+    const slots = await getTicksSlots(AMM, pool, 0, 0, publicClient, blockNumber);
     await verifySlots(slots);
   });
 
