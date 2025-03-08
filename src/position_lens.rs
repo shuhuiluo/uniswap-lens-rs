@@ -145,7 +145,7 @@ mod tests {
     /// Computes the address of a Uniswap V3 pool given the factory address, the two tokens, and the
     /// fee.
     ///
-    /// # Arguments
+    /// ## Arguments
     ///
     /// * `factory`: The Uniswap V3 factory address
     /// * `token_0`: The first token address
