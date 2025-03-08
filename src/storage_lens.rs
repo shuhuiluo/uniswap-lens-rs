@@ -16,7 +16,7 @@ use alloy::{
 /// Batch `eth_getStorageAt` RPC calls in a single `eth_call` by overriding the target contract's
 /// deployed bytecode with `EphemeralStorageLens`
 ///
-/// # Arguments
+/// ## Arguments
 ///
 /// * `address`: The contract address to fetch storage from
 /// * `slots`: The storage slots to query
