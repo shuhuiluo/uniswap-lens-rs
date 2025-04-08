@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {PoolAddress} from "@aperture_finance/uni-v3-lib/src/PoolAddress.sol";
 import "contracts/EphemeralAllPositionsByOwner.sol";
 import "contracts/EphemeralGetPosition.sol";
 import "contracts/EphemeralGetPositions.sol";

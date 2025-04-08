@@ -8,10 +8,6 @@ import {
   EphemeralPoolTicks__factory,
 } from "../../typechain";
 import { callEphemeralContract } from "./caller";
-import { z } from "zod";
-
-export const AutomatedMarketMakerEnum = z.enum(["UNISWAP_V3", "PANCAKESWAP_V3"]);
-export type AutomatedMarketMakerEnum = z.infer<typeof AutomatedMarketMakerEnum>;
 
 /**
  * Fetches the liquidity within the tick range for the specified pool by deploying an ephemeral contract via `eth_call`.
@@ -41,12 +37,7 @@ export async function getPopulatedTicksInRange(
   );
 }
 
-export async function getStaticSlots(
-  amm: AutomatedMarketMakerEnum,
-  pool: Address,
-  publicClient: PublicClient,
-  blockNumber?: bigint,
-) {
+export async function getStaticSlots(pool: Address, publicClient: PublicClient, blockNumber?: bigint) {
   return await callEphemeralContract(
     {
       abi: EphemeralPoolSlots__factory.abi,
@@ -59,7 +50,6 @@ export async function getStaticSlots(
 }
 
 export async function getTicksSlots(
-  amm: AutomatedMarketMakerEnum,
   pool: Address,
   tickLower: number,
   tickUpper: number,
@@ -77,12 +67,7 @@ export async function getTicksSlots(
   );
 }
 
-export async function getTickBitmapSlots(
-  amm: AutomatedMarketMakerEnum,
-  pool: Address,
-  publicClient: PublicClient,
-  blockNumber?: bigint,
-) {
+export async function getTickBitmapSlots(pool: Address, publicClient: PublicClient, blockNumber?: bigint) {
   return await callEphemeralContract(
     {
       abi: EphemeralPoolTickBitmap__factory.abi,
@@ -100,7 +85,6 @@ export type PositionKey = AbiParametersToPrimitiveTypes<
 >[1][0];
 
 export async function getPositionsSlots(
-  amm: AutomatedMarketMakerEnum,
   pool: Address,
   keys: PositionKey[],
   publicClient: PublicClient,

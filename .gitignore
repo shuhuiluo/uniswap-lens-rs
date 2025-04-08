@@ -142,7 +142,6 @@ artifacts
 cache_hardhat
 typechain
 
-
 # Added by cargo
 Cargo.lock
 /target
