@@ -20,6 +20,10 @@ jobs:
         with:
           submodules: recursive
 
+      # Enable Corepack before setting up Node.js
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Use Node.js 20.x
         uses: actions/setup-node@v4
         with:
@@ -28,12 +32,12 @@ jobs:
           cache-dependency-path: "yarn.lock"
 
       - name: Install dependencies 📦
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: stable
 
       - name: Run Forge build
         run: |
