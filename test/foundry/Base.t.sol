@@ -15,11 +15,6 @@ import "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.so
 import "forge-std/Test.sol";
 import "solady/src/utils/SafeTransferLib.sol";
 
-enum DEX {
-    UniswapV3,
-    PancakeSwapV3
-}
-
 abstract contract BaseTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallback {
     using SafeTransferLib for address;
     using TernaryLib for bool;
@@ -29,8 +24,6 @@ abstract contract BaseTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
     /// = (MAX_SQRT_RATIO - 1) ^ ((MIN_SQRT_RATIO + 1 ^ MAX_SQRT_RATIO - 1) * zeroForOne)
     uint160 internal constant MIN_SQRT_RATIO_PLUS_ONE = TickMath.MIN_SQRT_RATIO + 1;
     uint160 internal constant MAX_SQRT_RATIO_MINUS_ONE = 1461446703485210103287273052203988822378723970342 - 1;
-
-    DEX internal dex;
 
     // Uniswap v3 position manager
     INPM internal npm;
@@ -68,15 +61,7 @@ abstract contract BaseTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         if (chainId == 1) {
             vm.createSelectFork(chainAlias, 17000000);
             USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-            npm = dex == DEX.PancakeSwapV3
-                ? INPM(0x46A15B0b27311cedF172AB29E4f4766fbE7F4364)
-                : INPM(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
-        } else if (chainId == 56) {
-            vm.createSelectFork(chainAlias);
-            USDC = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d;
-            npm = dex == DEX.PancakeSwapV3
-                ? INPM(0x46A15B0b27311cedF172AB29E4f4766fbE7F4364)
-                : INPM(0x7b8A01B39D58278b5DE7e48c8449c9f4F5170613);
+            npm = INPM(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
         } else {
             revert("Unsupported chain");
         }

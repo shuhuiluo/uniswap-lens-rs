@@ -2,7 +2,6 @@ import { computePoolAddress } from "@uniswap/v3-sdk";
 import { expect } from "chai";
 import { Address, ContractFunctionReturnType, createPublicClient, getContract, http, toHex } from "viem";
 import {
-  AutomatedMarketMakerEnum,
   getAllPositionsByOwner,
   getPopulatedTicksInRange,
   getPositionDetails,
@@ -22,7 +21,6 @@ import {
 import { mainnet } from "viem/chains";
 import { Token } from "@uniswap/sdk-core";
 
-const AMM = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
 const UNIV3_NPM = "0xC36442b4a4522E871399CD717aBDD847Ab11FE88";
 const UNIV3_FACTORY = "0x1F98431c8aD98523631AE4a59f267346ea31F984";
 const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
@@ -31,12 +29,12 @@ const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 describe("Pool lens test with UniV3 on mainnet", () => {
   const publicClient = createPublicClient({
     chain: mainnet,
-    transport: http("https://ethereum-rpc.publicnode.com"),
+    transport: http(),
     batch: {
       multicall: true,
     },
   });
-  let blockNumber: bigint;
+  const blockNumber = 17000000n;
   const pool = computePoolAddress({
     factoryAddress: UNIV3_FACTORY,
     tokenA: new Token(mainnet.id, USDC_ADDRESS, 6, "USDC"),
@@ -55,7 +53,6 @@ describe("Pool lens test with UniV3 on mainnet", () => {
   });
 
   before(async () => {
-    blockNumber = (await publicClient.getBlockNumber()) - 64n;
     console.log(`Running UniV3 tests on Ethereum mainnet at block number ${blockNumber}...`);
   });
 
@@ -153,17 +150,17 @@ describe("Pool lens test with UniV3 on mainnet", () => {
   }
 
   it("Test getting static storage slots", async () => {
-    const slots = await getStaticSlots(AMM, pool, publicClient, blockNumber);
+    const slots = await getStaticSlots(pool, publicClient, blockNumber);
     await verifySlots(slots);
   });
 
   it("Test getting populated ticks slots", async () => {
-    const slots = await getTicksSlots(AMM, pool, 0, 0, publicClient, blockNumber);
+    const slots = await getTicksSlots(pool, 0, 0, publicClient, blockNumber);
     await verifySlots(slots);
   });
 
   it("Test getting tick bitmap slots", async () => {
-    const slots = await getTickBitmapSlots(AMM, pool, publicClient, blockNumber);
+    const slots = await getTickBitmapSlots(pool, publicClient, blockNumber);
     await verifySlots(slots);
   });
 
@@ -180,7 +177,7 @@ describe("Pool lens test with UniV3 on mainnet", () => {
       tickLower: tickLower!,
       tickUpper: tickUpper!,
     }));
-    const slots = await getPositionsSlots(AMM, pool, positions, publicClient, blockNumber);
+    const slots = await getPositionsSlots(pool, positions, publicClient, blockNumber);
     await verifySlots(slots);
   });
 });
