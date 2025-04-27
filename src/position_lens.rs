@@ -133,43 +133,15 @@ mod tests {
         tests::*,
     };
     use alloy::{
-        primitives::{address, aliases::U24, b256, keccak256, uint, B256},
+        primitives::{address, b256, uint, B256},
         providers::{MulticallBuilder, RootProvider},
-        sol_types::SolValue,
     };
+    use uniswap_v3_sdk::utils::compute_pool_address;
 
     const FACTORY_ADDRESS: Address = address!("1F98431c8aD98523631AE4a59f267346ea31F984");
     const NPM_ADDRESS: Address = address!("C36442b4a4522E871399CD717aBDD847Ab11FE88");
     static POOL_INIT_CODE_HASH: B256 =
         b256!("e34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54");
-
-    /// Computes the address of a Uniswap V3 pool given the factory address, the two tokens, and the
-    /// fee.
-    ///
-    /// ## Arguments
-    ///
-    /// * `factory`: The Uniswap V3 factory address
-    /// * `token_0`: The first token address
-    /// * `token_1`: The second token address
-    /// * `fee`: The fee tier
-    /// * `init_code_hash`: The init code hash of the pool
-    ///
-    /// returns: Address
-    fn compute_pool_address(
-        factory: Address,
-        token_a: Address,
-        token_b: Address,
-        fee: U24,
-        init_code_hash: B256,
-    ) -> Address {
-        let (token_0, token_1) = if token_a < token_b {
-            (token_a, token_b)
-        } else {
-            (token_b, token_a)
-        };
-        let pool_key = (token_0, token_1, fee);
-        factory.create2(keccak256(pool_key.abi_encode()), init_code_hash)
-    }
 
     #[tokio::test]
     async fn test_get_position_details() {
@@ -196,7 +168,14 @@ mod tests {
         .await
         .unwrap();
         let pool = IUniswapV3Pool::new(
-            compute_pool_address(FACTORY_ADDRESS, token0, token1, fee, POOL_INIT_CODE_HASH),
+            compute_pool_address(
+                FACTORY_ADDRESS,
+                token0,
+                token1,
+                fee.into(),
+                Some(POOL_INIT_CODE_HASH),
+                None,
+            ),
             provider,
         );
         let slot0 = pool.slot0().block(BLOCK_NUMBER).call().await.unwrap();
