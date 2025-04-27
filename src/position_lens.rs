@@ -134,6 +134,7 @@ mod tests {
     };
     use alloy::{
         primitives::{address, aliases::U24, b256, keccak256, uint, B256},
+        providers::{MulticallBuilder, RootProvider},
         sol_types::SolValue,
     };
 
@@ -204,73 +205,36 @@ mod tests {
         assert_eq!(tick, slot0.tick);
     }
 
-    // async fn verify_position_details(
-    //     positions: Vec<PositionState>,
-    //     npm: INonfungiblePositionManager<Provider<Http>>,
-    // ) -> Result<()> {
-    //     assert!(!positions.is_empty());
-    //     let client = npm.client();
-    //     let mut multicall = Multicall::new(client.clone(), None).await.unwrap();
-    //     multicall.add_calls(
-    //         false,
-    //         positions
-    //             .iter()
-    //             .map(|PositionState { token_id, .. }| npm.positions(*token_id)),
-    //     );
-    //     #[allow(clippy::type_complexity)]
-    //     let alt_positions: Vec<(
-    //         u128,
-    //         Address,
-    //         Address,
-    //         Address,
-    //         u32,
-    //         i32,
-    //         i32,
-    //         u128,
-    //         U256,
-    //         U256,
-    //         u128,
-    //         u128,
-    //     )> = multicall
-    //         .block(match BLOCK_NUMBER {
-    //             BlockId::Number(n) => n,
-    //             _ => panic!("block id must be a number"),
-    //         })
-    //         .call_array()
-    //         .await?;
-    //     for (
-    //         i,
-    //         &PositionState {
-    //             position:
-    //                 PositionFull {
-    //                     token_0,
-    //                     token_1,
-    //                     fee,
-    //                     tick_lower,
-    //                     tick_upper,
-    //                     liquidity,
-    //                     ..
-    //                 },
-    //             ..
-    //         },
-    //     ) in positions.iter().enumerate()
-    //     {
-    //         let (_, _, _token_0, _token_1, _fee, _tick_lower, _tick_upper, _liquidity, _, _, _,
-    // _) =             alt_positions[i];
-    //         assert_eq!(token_0, _token_0);
-    //         assert_eq!(token_1, _token_1);
-    //         assert_eq!(fee, _fee);
-    //         assert_eq!(tick_lower, _tick_lower);
-    //         assert_eq!(tick_upper, _tick_upper);
-    //         assert_eq!(liquidity, _liquidity);
-    //     }
-    //     Ok(())
-    // }
+    async fn verify_position_details(
+        positions: Vec<EphemeralGetPositions::PositionState>,
+        npm: IUniswapV3NonfungiblePositionManager::IUniswapV3NonfungiblePositionManagerInstance<
+            (),
+            RootProvider,
+        >,
+    ) {
+        assert!(!positions.is_empty());
+        let mut multicall = MulticallBuilder::new_dynamic(npm.provider());
+        for EphemeralGetPositions::PositionState { tokenId, .. } in positions.iter() {
+            multicall = multicall.add_dynamic(npm.positions(*tokenId));
+        }
+        let alt_positions: Vec<IUniswapV3NonfungiblePositionManager::positionsReturn> =
+            multicall.block(BLOCK_NUMBER).aggregate().await.unwrap();
+        for (i, EphemeralGetPositions::PositionState { position, .. }) in
+            positions.into_iter().enumerate()
+        {
+            assert_eq!(position.token0, alt_positions[i].token0);
+            assert_eq!(position.token1, alt_positions[i].token1);
+            assert_eq!(position.fee, alt_positions[i].fee);
+            assert_eq!(position.tickLower, alt_positions[i].tickLower);
+            assert_eq!(position.tickUpper, alt_positions[i].tickUpper);
+            assert_eq!(position.liquidity, alt_positions[i].liquidity);
+        }
+    }
 
     #[tokio::test]
     async fn test_get_positions() {
         let provider = PROVIDER.clone();
-        let _positions = get_positions(
+        let positions = get_positions(
             NPM_ADDRESS,
             (1_u64..100)
                 .map(|i| U256::from_limbs([i, 0, 0, 0]))
@@ -280,8 +244,8 @@ mod tests {
         )
         .await
         .unwrap();
-        let _npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider);
-        // verify_position_details(positions, npm).await
+        let npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider);
+        verify_position_details(positions, npm).await;
     }
 
     #[tokio::test]
