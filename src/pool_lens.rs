@@ -204,7 +204,9 @@ mod tests {
         bindings::iuniswapv3pool::{IUniswapV3Pool, IUniswapV3Pool::Mint},
         tests::*,
     };
-    use alloy::{primitives::address, rpc::types::Filter, sol_types::SolEvent};
+    use alloy::{
+        primitives::address, providers::MulticallBuilder, rpc::types::Filter, sol_types::SolEvent,
+    };
     use futures::future::join_all;
 
     const POOL_ADDRESS: Address = address!("88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640");
@@ -225,40 +227,32 @@ mod tests {
             POOL_ADDRESS,
             tick_current,
             tick_current + (tick_spacing << 8),
-            provider,
+            provider.clone(),
             Some(BLOCK_NUMBER),
         )
         .await
         .unwrap();
         assert!(!ticks.is_empty());
-        // let mut multicall = Multicall::new(client.clone(), None).await?;
-        // multicall.add_calls(
-        //     false,
-        //     ticks
-        //         .iter()
-        //         .map(|&PopulatedTick { tick, .. }| pool.ticks(tick)),
-        // );
-        // #[allow(clippy::type_complexity)]
-        // let alt_ticks: Vec<(u128, i128, U256, U256, i64, U256, u32, bool)> = multicall
-        //     .block(match BLOCK_NUMBER {
-        //         BlockId::Number(n) => n,
-        //         _ => panic!("block id must be a number"),
-        //     })
-        //     .call_array()
-        //     .await?;
-        // for (
-        //     i,
-        //     &PopulatedTick {
-        //         liquidity_gross,
-        //         liquidity_net,
-        //         ..
-        //     },
-        // ) in ticks.iter().enumerate()
-        // {
-        //     let (_liquidity_gross, _liquidity_net, _, _, _, _, _, _) = alt_ticks[i];
-        //     assert_eq!(liquidity_gross, _liquidity_gross);
-        //     assert_eq!(liquidity_net, _liquidity_net);
-        // }
+
+        let mut multicall = MulticallBuilder::new_dynamic(provider.clone());
+        for PopulatedTick { tick, .. } in ticks.iter() {
+            multicall = multicall.add_dynamic(pool.ticks(*tick));
+        }
+        let alt_ticks = multicall.block(BLOCK_NUMBER).aggregate().await.unwrap();
+
+        for (
+            i,
+            PopulatedTick {
+                liquidityGross,
+                liquidityNet,
+                ..
+            },
+        ) in ticks.into_iter().enumerate()
+        {
+            let tick_info = &alt_ticks[i];
+            assert_eq!(liquidityGross, tick_info.liquidityGross);
+            assert_eq!(liquidityNet, tick_info.liquidityNet);
+        }
     }
 
     async fn verify_slots<N, P>(slots: Vec<Slot>, provider: P)
