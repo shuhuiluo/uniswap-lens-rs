@@ -34,9 +34,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "bind": "forge bind --alloy -b src/bindings/ --module --overwrite",
     "build": "yarn typechain && tsc --build",
-    "clean": "tsc --build --clean && forge clean",
+    "clean": "tsc --build --clean && forge clean && hardhat clean",
     "compile": "forge build",
     "test": "forge test",
     "test:hardhat": "hardhat test",

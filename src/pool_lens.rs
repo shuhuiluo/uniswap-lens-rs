@@ -13,9 +13,7 @@ use crate::{
         },
         ephemeralpoolpositions::{EphemeralPoolPositions, PoolUtils::PositionKey},
         ephemeralpoolslots::{
-            EphemeralPoolSlots,
-            EphemeralPoolSlots::{getSlotsCall, getSlotsReturn},
-            PoolUtils::Slot,
+            EphemeralPoolSlots, EphemeralPoolSlots::getSlotsCall, PoolUtils::Slot,
         },
         ephemeralpooltickbitmap::EphemeralPoolTickBitmap,
         ephemeralpoolticks::EphemeralPoolTicks,
@@ -79,10 +77,7 @@ where
 /// Call an ephemeral contract and return the decoded storage slots
 macro_rules! get_pool_storage {
     ($deploy_builder:expr, $block_id:expr) => {
-        match call_ephemeral_contract!($deploy_builder, getSlotsCall, $block_id) {
-            Ok(getSlotsReturn { slots }) => Ok(slots),
-            Err(err) => Err(err.into()),
-        }
+        call_ephemeral_contract!($deploy_builder, getSlotsCall, $block_id)
     };
 }
 
@@ -216,13 +211,7 @@ mod tests {
         let provider = PROVIDER.clone();
         let pool = IUniswapV3Pool::new(POOL_ADDRESS, provider.clone());
         let tick_current = pool.slot0().block(BLOCK_NUMBER).call().await.unwrap().tick;
-        let tick_spacing = pool
-            .tickSpacing()
-            .block(BLOCK_NUMBER)
-            .call()
-            .await
-            .unwrap()
-            ._0;
+        let tick_spacing = pool.tickSpacing().block(BLOCK_NUMBER).call().await.unwrap();
         let (ticks, _) = get_populated_ticks_in_range(
             POOL_ADDRESS,
             tick_current,
@@ -313,14 +302,14 @@ mod tests {
         let provider = PROVIDER.clone();
         // create a filter to get the mint events
         let filter = Filter::new()
-            .from_block(BLOCK_NUMBER.as_u64().unwrap() - 10000)
+            .from_block(BLOCK_NUMBER.as_u64().unwrap() - 499)
             .to_block(BLOCK_NUMBER.as_u64().unwrap())
             .event_signature(<Mint as SolEvent>::SIGNATURE_HASH);
         let logs = provider.get_logs(&filter).await.unwrap();
         // decode the logs into position keys
         let positions: Vec<_> = logs
             .iter()
-            .map(|log| <Mint as SolEvent>::decode_log_data(log.data(), true).unwrap())
+            .map(|log| <Mint as SolEvent>::decode_log_data(log.data()).unwrap())
             .map(
                 |Mint {
                      owner,

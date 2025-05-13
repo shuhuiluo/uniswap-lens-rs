@@ -39,8 +39,8 @@ jobs:
         with:
           version: stable
 
-      - name: Generate contract Rust bindings
-        run: yarn bind
+      - name: Compile contracts
+        run: forge build
 
       - name: Cache Cargo registry
         uses: actions/cache@v4
@@ -89,8 +89,8 @@ jobs:
         with:
           version: stable
 
-      - name: Generate contract Rust bindings
-        run: yarn bind
+      - name: Compile contracts
+        run: forge build
 
       - name: Cache Cargo registry
         uses: actions/cache@v4
