@@ -4,6 +4,7 @@
 ///
 /// * `module_name` - The name of the module to create
 /// * `contract_name` - The name of the contract to bind
+#[macro_export]
 macro_rules! create_sol_binding {
     ($module_name:ident, $contract_name:ident) => {
         pub mod $module_name {
@@ -11,8 +12,7 @@ macro_rules! create_sol_binding {
                 #[sol(rpc)]
                 $contract_name,
                 concat!(
-                    env!("CARGO_MANIFEST_DIR"),
-                    "/out/",
+                    "out/",
                     stringify!($contract_name),
                     ".sol/",
                     stringify!($contract_name),
@@ -37,10 +37,10 @@ create_sol_binding!(ephemeralgetposition, EphemeralGetPosition);
 create_sol_binding!(ephemeralgetpositions, EphemeralGetPositions);
 create_sol_binding!(ephemeralstoragelens, EphemeralStorageLens);
 
+#[cfg(test)]
 create_sol_binding!(iuniswapv3pool, IUniswapV3Pool);
+#[cfg(test)]
 create_sol_binding!(
     iuniswapv3nonfungiblepositionmanager,
     IUniswapV3NonfungiblePositionManager
 );
-create_sol_binding!(ierc20, IERC20);
-create_sol_binding!(ierc721enumerable, IERC721Enumerable);
