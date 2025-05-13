@@ -5,17 +5,10 @@
 use crate::{
     bindings::{
         ephemeralallpositionsbyowner::{
-            EphemeralAllPositionsByOwner,
-            EphemeralAllPositionsByOwner::{allPositionsCall, allPositionsReturn},
+            EphemeralAllPositionsByOwner, EphemeralAllPositionsByOwner::allPositionsCall,
         },
-        ephemeralgetposition::{
-            EphemeralGetPosition,
-            EphemeralGetPosition::{getPositionCall, getPositionReturn},
-        },
-        ephemeralgetpositions::{
-            EphemeralGetPositions,
-            EphemeralGetPositions::{getPositionsCall, getPositionsReturn},
-        },
+        ephemeralgetposition::{EphemeralGetPosition, EphemeralGetPosition::getPositionCall},
+        ephemeralgetpositions::{EphemeralGetPositions, EphemeralGetPositions::getPositionsCall},
     },
     call_ephemeral_contract,
     error::Error,
@@ -55,10 +48,7 @@ where
     P: Provider<N>,
 {
     let deploy_builder = EphemeralGetPosition::deploy_builder(provider, npm, token_id);
-    match call_ephemeral_contract!(deploy_builder, getPositionCall, block_id) {
-        Ok(getPositionReturn { state }) => Ok(state),
-        Err(err) => Err(err),
-    }
+    call_ephemeral_contract!(deploy_builder, getPositionCall, block_id)
 }
 
 /// Get the details of multiple positions given the token IDs.
@@ -85,10 +75,7 @@ where
     P: Provider<N>,
 {
     let deploy_builder = EphemeralGetPositions::deploy_builder(provider, npm, token_ids);
-    match call_ephemeral_contract!(deploy_builder, getPositionsCall, block_id) {
-        Ok(getPositionsReturn { positions }) => Ok(positions),
-        Err(err) => Err(err),
-    }
+    call_ephemeral_contract!(deploy_builder, getPositionsCall, block_id)
 }
 
 /// Get all positions owned by an address.
@@ -115,10 +102,7 @@ where
     P: Provider<N>,
 {
     let deploy_builder = EphemeralAllPositionsByOwner::deploy_builder(provider, npm, owner);
-    match call_ephemeral_contract!(deploy_builder, allPositionsCall, block_id) {
-        Ok(allPositionsReturn { positions }) => Ok(positions),
-        Err(err) => Err(err),
-    }
+    call_ephemeral_contract!(deploy_builder, allPositionsCall, block_id)
 }
 
 #[cfg(test)]
@@ -133,15 +117,31 @@ mod tests {
         tests::*,
     };
     use alloy::{
-        primitives::{address, b256, uint, B256},
+        primitives::{address, aliases::U24, b256, keccak256, uint, B256},
         providers::{MulticallBuilder, RootProvider},
+        sol_types::SolValue,
     };
-    use uniswap_v3_sdk::utils::compute_pool_address;
 
     const FACTORY_ADDRESS: Address = address!("1F98431c8aD98523631AE4a59f267346ea31F984");
     const NPM_ADDRESS: Address = address!("C36442b4a4522E871399CD717aBDD847Ab11FE88");
     static POOL_INIT_CODE_HASH: B256 =
         b256!("e34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54");
+
+    fn compute_pool_address(
+        factory: Address,
+        token_a: Address,
+        token_b: Address,
+        fee: U24,
+        init_code_hash: B256,
+    ) -> Address {
+        let (token_0, token_1) = if token_a < token_b {
+            (token_a, token_b)
+        } else {
+            (token_b, token_a)
+        };
+        let pool_key = (token_0, token_1, fee);
+        factory.create2(keccak256(pool_key.abi_encode()), init_code_hash)
+    }
 
     #[tokio::test]
     async fn test_get_position_details() {
@@ -168,14 +168,7 @@ mod tests {
         .await
         .unwrap();
         let pool = IUniswapV3Pool::new(
-            compute_pool_address(
-                FACTORY_ADDRESS,
-                token0,
-                token1,
-                fee.into(),
-                Some(POOL_INIT_CODE_HASH),
-                None,
-            ),
+            compute_pool_address(FACTORY_ADDRESS, token0, token1, fee, POOL_INIT_CODE_HASH),
             provider,
         );
         let slot0 = pool.slot0().block(BLOCK_NUMBER).call().await.unwrap();
@@ -187,7 +180,6 @@ mod tests {
     async fn verify_position_details(
         positions: Vec<EphemeralGetPositions::PositionState>,
         npm: IUniswapV3NonfungiblePositionManager::IUniswapV3NonfungiblePositionManagerInstance<
-            (),
             RootProvider,
         >,
     ) {
@@ -231,24 +223,21 @@ mod tests {
     async fn test_get_all_positions_by_owner() {
         let provider = PROVIDER.clone();
         let npm = IUniswapV3NonfungiblePositionManager::new(NPM_ADDRESS, provider.clone());
-        let total_supply: U256 = npm
-            .totalSupply()
-            .block(BLOCK_NUMBER)
-            .call()
-            .await
-            .unwrap()
-            ._0;
+        let total_supply: U256 = npm.totalSupply().block(BLOCK_NUMBER).call().await.unwrap();
         let owner = npm
             .ownerOf(total_supply - uint!(1_U256))
             .block(BLOCK_NUMBER)
             .call()
             .await
-            .unwrap()
-            .owner;
-        let _positions =
+            .unwrap();
+        let positions =
             get_all_positions_by_owner(NPM_ADDRESS, owner, provider, Some(BLOCK_NUMBER))
                 .await
                 .unwrap();
-        // verify_position_details(positions, npm).await
+        // Convert from Vec<EphemeralAllPositionsByOwner::PositionState> to
+        // Vec<EphemeralGetPositions::PositionState>
+        let positions: Vec<EphemeralGetPositions::PositionState> =
+            unsafe { core::mem::transmute(positions) };
+        verify_position_details(positions, npm).await
     }
 }

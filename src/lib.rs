@@ -17,7 +17,6 @@
 
 extern crate alloc;
 
-#[allow(warnings)]
 pub mod bindings;
 pub mod caller;
 pub mod error;

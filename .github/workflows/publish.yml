@@ -34,8 +34,8 @@ jobs:
         with:
           version: stable
 
-      - name: Generate contract Rust bindings
-        run: yarn bind
+      - name: Compile contracts
+        run: forge build
 
       - name: Publish to crates.io
         run: cargo publish --allow-dirty

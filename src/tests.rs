@@ -14,5 +14,5 @@ pub(crate) static RPC_URL: Lazy<Url> = Lazy::new(|| {
 pub(crate) static PROVIDER: Lazy<RootProvider> = Lazy::new(|| {
     ProviderBuilder::new()
         .disable_recommended_fillers()
-        .on_http(RPC_URL.clone())
+        .connect_http(RPC_URL.clone())
 });

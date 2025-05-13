@@ -51,7 +51,7 @@ where
         Some(block_id) => call_builder.block(block_id),
         None => call_builder,
     };
-    Ok(call_builder.call().await?._0)
+    Ok(call_builder.call().await?)
 }
 
 #[cfg(test)]
