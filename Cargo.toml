@@ -1,6 +1,6 @@
 [package]
 name = "uniswap-lens"
-version = "0.14.0"
+version = "0.15.0"
 edition = "2021"
 authors = ["Shuhui Luo <twitter.com/aureliano_law>"]
 description = "A library for querying Uniswap V3 using ephemeral lens contracts."
@@ -8,15 +8,31 @@ license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/shuhuiluo/uniswap-lens-rs"
 categories = ["cryptography::cryptocurrencies", "finance", "no-std"]
-keywords = ["alloy", "ethereum", "solidity", "uniswap"]
-include = ["src/**/*.rs", "out"]
+keywords = ["alloy", "ethereum", "lens", "solidity", "uniswap"]
+include = [
+    "src/**/*.rs",
+    "out/EphemeralAllPositionsByOwner.sol",
+    "out/EphemeralGetPopulatedTicksInRange.sol",
+    "out/EphemeralGetPosition.sol",
+    "out/EphemeralGetPositions.sol",
+    "out/EphemeralPoolPositions.sol",
+    "out/EphemeralPoolSlots.sol",
+    "out/EphemeralPoolTickBitmap.sol",
+    "out/EphemeralPoolTicks.sol",
+    "out/EphemeralStorageLens.sol",
+    "out/IUniswapV3Pool.sol",
+    "out/IUniswapV3NonfungiblePositionManager.sol",
+    "out/IERC20.sol",
+    "out/IERC20Metadata.sol",
+    "out/IERC721Enumerable.sol"
+]
 
 [dependencies]
-alloy = { version = "0.15", default-features = false, features = ["contract", "json-rpc", "rpc-types"] }
+alloy = { version = "1.0.1", default-features = false, features = ["contract", "json-rpc", "rpc-types"] }
 thiserror = { version = "2", default-features = false }
 
 [dev-dependencies]
-alloy = { version = "0.15", default-features = false, features = ["transport-http", "reqwest"] }
+alloy = { version = "1.0.1", default-features = false, features = ["transport-http", "reqwest"] }
 dotenv = "0.15"
 futures = "0.3"
 once_cell = "1.20"
