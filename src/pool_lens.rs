@@ -302,7 +302,7 @@ mod tests {
         let provider = PROVIDER.clone();
         // create a filter to get the mint events
         let filter = Filter::new()
-            .from_block(BLOCK_NUMBER.as_u64().unwrap() - 499)
+            .from_block(BLOCK_NUMBER.as_u64().unwrap() - 9)
             .to_block(BLOCK_NUMBER.as_u64().unwrap())
             .event_signature(<Mint as SolEvent>::SIGNATURE_HASH);
         let logs = provider.get_logs(&filter).await.unwrap();
