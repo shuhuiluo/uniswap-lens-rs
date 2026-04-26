@@ -5,6 +5,9 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # Run at 12:00 AM UTC daily
 
 env:
   CARGO_TERM_COLOR: always
@@ -54,8 +57,7 @@ jobs:
             ${{ runner.os }}-cargo-registry-
 
       - name: Install Rust toolchain via rustup
-        run:
-          rustup component add clippy
+        run: rustup component add clippy
 
       - name: Check linting
         run: cargo clippy --all-targets --all-features -- -D warnings
